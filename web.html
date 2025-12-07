@@ -247,20 +247,18 @@
                         </div>
                         <p class="text-blue-600 text-xs mb-4">Masukkan NIK Anda untuk memastikan belum pernah mendaftar sebelumnya.</p>
                         
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <label for="nik" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelNik">NIK (KTP)</span> <span class="text-red-500">*</span></label>
-                            <div class="flex gap-3">
-                                <div class="input-group relative group flex-1">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i class="fas fa-id-card text-gray-400 transition-colors"></i>
-                                    </div>
-                                    <input type="text" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*" class="block w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="Masukkan 16 Digit NIK" data-placeholder-i18n="placeholderNik" required>
-                                </div>
-                                <button type="button" id="btnCheckNik" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <i class="fas fa-search"></i>
-                                    <span>Cek NIK</span>
-                                </button>
+                            <!-- Input NIK Full Width - tanpa icon supaya lebih lebar -->
+                            <div class="input-group relative group">
+                                <input type="text" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*" class="block w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-800 placeholder-gray-400 text-center text-xl tracking-[0.3em] font-bold" placeholder="0000000000000000" data-placeholder-i18n="placeholderNik" required style="letter-spacing: 0.2em; font-family: 'Courier New', monospace;">
                             </div>
+                            <p class="text-center text-xs text-gray-500">Masukkan 16 digit NIK sesuai KTP</p>
+                            <!-- Tombol Cek NIK di bawah -->
+                            <button type="button" id="btnCheckNik" class="w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i class="fas fa-search"></i>
+                                <span>Cek NIK</span>
+                            </button>
                             <!-- NIK Status Message -->
                             <div id="nikStatus" class="hidden mt-2 p-3 rounded-xl text-sm flex items-center gap-2"></div>
                         </div>
@@ -304,7 +302,7 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-briefcase-medical text-gray-400 transition-colors"></i>
                             </div>
-                            <select id="profesi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required>
+                            <select id="profesi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required disabled>
                                 <option value="" selected disabled data-i18n="optionSelectProf">Pilih Profesi Anda...</option>
                                 
                                 <optgroup label="Perawat & Ners" class="font-bold text-blue-800 bg-blue-50">
@@ -361,7 +359,7 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-envelope text-gray-400 transition-colors"></i>
                             </div>
-                            <input type="email" id="email" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="nama@email.com" required>
+                            <input type="email" id="email" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="nama@email.com" required disabled>
                         </div>
                     </div>
 
@@ -370,14 +368,14 @@
                         <label class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelSatuSehat">Memiliki Akun Satu Sehat LMS?</span> <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-2 gap-4">
                             <label class="cursor-pointer relative">
-                                <input type="radio" name="satuSehat" value="Ya" class="peer sr-only" required>
+                                <input type="radio" name="satuSehat" value="Ya" class="peer sr-only" required disabled>
                                 <div class="p-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all text-center group">
                                     <i class="fas fa-check-circle text-gray-300 peer-checked:text-blue-500 text-xl mb-1 block transition-colors group-hover:text-blue-400"></i>
                                     <span class="text-sm font-medium text-gray-600 peer-checked:text-blue-700" data-i18n="optionYes">Ya, Punya</span>
                                 </div>
                             </label>
                             <label class="cursor-pointer relative">
-                                <input type="radio" name="satuSehat" value="Tidak" class="peer sr-only" required>
+                                <input type="radio" name="satuSehat" value="Tidak" class="peer sr-only" required disabled>
                                 <div class="p-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all text-center group">
                                     <i class="fas fa-times-circle text-gray-300 peer-checked:text-red-500 text-xl mb-1 block transition-colors group-hover:text-red-400"></i>
                                     <span class="text-sm font-medium text-gray-600 peer-checked:text-red-700" data-i18n="optionNo">Belum Punya</span>
@@ -398,7 +396,7 @@
                             <div class="absolute top-3 left-0 pl-4 flex items-start pointer-events-none">
                                 <i class="fas fa-map-marker-alt text-gray-400 mt-1 transition-colors"></i>
                             </div>
-                            <textarea id="alamat" rows="3" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 resize-none" placeholder="Nama Jalan, RT/RW, Kelurahan, Kecamatan" data-placeholder-i18n="placeholderAddress" required></textarea>
+                            <textarea id="alamat" rows="3" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 resize-none" placeholder="Nama Jalan, RT/RW, Kelurahan, Kecamatan" data-placeholder-i18n="placeholderAddress" required disabled></textarea>
                         </div>
                     </div>
 
@@ -409,7 +407,7 @@
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <i class="fas fa-map text-gray-400 transition-colors"></i>
                             </div>
-                            <select id="provinsi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required>
+                            <select id="provinsi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required disabled>
                                 <option value="" selected disabled data-i18n="optionSelectProv">Pilih Provinsi Domisili...</option>
                                 <!-- JS Generated -->
                             </select>
@@ -419,12 +417,44 @@
                         </div>
                     </div>
 
+                    <!-- Section: Pembayaran -->
+                    <div class="border-b border-gray-100 pb-2 mt-8 mb-4">
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Informasi Pembayaran</h3>
+                    </div>
+
+                    <!-- Info Rekening Pembayaran -->
+                    <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-2xl p-5 mb-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i class="fas fa-credit-card text-orange-600"></i>
+                            <h4 class="text-orange-800 text-sm font-bold">Pembayaran dapat dilakukan</h4>
+                        </div>
+                        <p class="text-orange-700 text-sm mb-3">Melalui <strong>Cash / Transfer</strong></p>
+                        
+                        <div class="bg-white rounded-xl p-4 border border-orange-100 shadow-sm">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                                    <span class="text-white font-bold text-sm">BNI</span>
+                                </div>
+                                <div>
+                                    <p class="text-gray-800 font-bold text-lg tracking-wider">1117359109</p>
+                                    <p class="text-gray-600 text-sm">a.n. <strong>CV BINA KARYA GEMILANG</strong></p>
+                                </div>
+                            </div>
+                            <p class="text-gray-500 text-xs mt-2"><i class="fas fa-map-marker-alt mr-1"></i> KCP Lubuk Pakam</p>
+                        </div>
+                        
+                        <div class="flex items-start gap-2 text-xs text-orange-600 mt-3">
+                            <i class="fas fa-exclamation-circle mt-0.5"></i>
+                            <p>Pastikan transfer sesuai nominal HTM: <strong>Rp. 50.000</strong></p>
+                        </div>
+                    </div>
+
                     <!-- 9. Upload Bukti -->
                     <div class="space-y-3 pt-2">
                         <label for="buktiBayar" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelUpload">Upload Bukti Pembayaran</span> <span class="text-red-500">*</span></label>
                         
                         <div class="relative group">
-                            <input type="file" id="buktiBayar" accept="image/*" required class="block w-full text-sm text-gray-500
+                            <input type="file" id="buktiBayar" accept="image/*" required disabled class="block w-full text-sm text-gray-500
                                 file:mr-4 file:py-2.5 file:px-4
                                 file:rounded-full file:border-0
                                 file:text-sm file:font-bold
@@ -440,7 +470,7 @@
                     </div>
 
                     <div class="pt-6">
-                        <button type="submit" class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden">
+                        <button type="submit" disabled class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
                             <!-- Shine Effect -->
                             <div class="absolute top-0 -inset-full h-full w-1/2 z-0 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine"></div>
                             
@@ -651,6 +681,206 @@
         // NOTE: This Google Apps Script supports two behaviors: save-to-sheet (default) and upload file (action: 'upload').
         // If you only want the upload-to-Drive behavior, the client will call the same `googleScriptUrl` with `action: 'upload'` and a base64 payload.
         const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw4hlzQbdK0LWpOZFJ-BV8m9VIE-6buMRbsYC5-aTikgCp0Mq_u9vdkE_ZViLmz_2k6bQ/exec"; // user-provided GAS web app URL
+
+        // =====================================================
+        // FITUR CEK NIK DUPLICATE
+        // =====================================================
+        
+        let nikVerified = false; // Flag apakah NIK sudah diverifikasi
+        
+        // Fungsi cek NIK via JSONP (menghindari CORS)
+        async function checkNikDuplicate(nik) {
+            return new Promise(function(resolve) {
+                var callbackName = 'nikCallback_' + Date.now();
+                var timeout = setTimeout(function() {
+                    cleanup();
+                    console.warn('JSONP timeout for checkNik');
+                    resolve({ success: false, error: 'Timeout - tidak ada respon dari server' });
+                }, 15000);
+                
+                window[callbackName] = function(data) {
+                    cleanup();
+                    console.log('checkNikDuplicate response:', data);
+                    resolve(data);
+                };
+                
+                function cleanup() {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+                
+                var script = document.createElement('script');
+                script.src = googleScriptUrl + '?callback=' + callbackName + '&action=checkNik&nik=' + encodeURIComponent(nik) + '&_=' + Date.now();
+                script.onerror = function() {
+                    cleanup();
+                    console.error('JSONP script error');
+                    resolve({ success: false, error: 'Gagal menghubungi server' });
+                };
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Show NIK status message
+        function showNikStatus(type, message) {
+            const statusEl = document.getElementById('nikStatus');
+            if (!statusEl) return;
+            
+            statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-yellow-100', 'text-yellow-700', 'bg-blue-100', 'text-blue-700');
+            
+            if (type === 'success') {
+                statusEl.classList.add('bg-green-100', 'text-green-700');
+                statusEl.innerHTML = '<i class="fas fa-check-circle"></i><span>' + message + '</span>';
+            } else if (type === 'error') {
+                statusEl.classList.add('bg-red-100', 'text-red-700');
+                statusEl.innerHTML = '<i class="fas fa-times-circle"></i><span>' + message + '</span>';
+            } else if (type === 'warning') {
+                statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
+                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>' + message + '</span>';
+            } else {
+                statusEl.classList.add('bg-blue-100', 'text-blue-700');
+                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + message + '</span>';
+            }
+            statusEl.classList.remove('hidden');
+        }
+        
+        // Hide NIK status
+        function hideNikStatus() {
+            const statusEl = document.getElementById('nikStatus');
+            if (statusEl) statusEl.classList.add('hidden');
+        }
+        
+        // Enable form fields after NIK verified
+        function enableFormFields() {
+            const container = document.getElementById('formFieldsContainer');
+            if (!container) return;
+            
+            container.classList.remove('opacity-50', 'pointer-events-none');
+            
+            // Enable all form inputs inside container
+            const inputs = container.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(function(el) {
+                el.disabled = false;
+            });
+        }
+        
+        // Disable form fields
+        function disableFormFields() {
+            const container = document.getElementById('formFieldsContainer');
+            if (!container) return;
+            
+            container.classList.add('opacity-50', 'pointer-events-none');
+            
+            // Disable all form inputs inside container
+            const inputs = container.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(function(el) {
+                el.disabled = true;
+            });
+        }
+        
+        // Handle Cek NIK button click
+        document.getElementById('btnCheckNik').addEventListener('click', async function() {
+            const nikInput = document.getElementById('nik');
+            const nik = nikInput.value.trim();
+            const btn = this;
+            
+            // Jika sudah terverifikasi dan tombol jadi "Ganti NIK", reset dulu
+            if (nikVerified) {
+                // Reset state - biarkan user edit NIK lagi
+                nikVerified = false;
+                nikInput.readOnly = false;
+                nikInput.value = '';
+                nikInput.focus();
+                nikInput.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+                hideNikStatus();
+                disableFormFields();
+                // Kembalikan tombol ke "Cek NIK"
+                btn.innerHTML = '<i class="fas fa-search"></i><span>Cek NIK</span>';
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                return;
+            }
+            
+            // Validasi format NIK
+            if (!nik) {
+                showNikStatus('warning', 'Silakan masukkan NIK terlebih dahulu');
+                return;
+            }
+            
+            if (nik.length !== 16) {
+                showNikStatus('warning', 'NIK harus 16 digit');
+                return;
+            }
+            
+            if (!/^\d+$/.test(nik)) {
+                showNikStatus('warning', 'NIK hanya boleh berisi angka');
+                return;
+            }
+            
+            // Disable button saat proses
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Mengecek...</span>';
+            showNikStatus('info', 'Sedang mengecek NIK...');
+            
+            try {
+                const result = await checkNikDuplicate(nik);
+                
+                if (result.success) {
+                    if (result.exists) {
+                        // NIK sudah terdaftar
+                        nikVerified = false;
+                        showNikStatus('error', 'NIK sudah terdaftar! Anda tidak dapat mendaftar lagi dengan NIK ini.');
+                        disableFormFields();
+                        nikInput.classList.add('border-red-500', 'bg-red-50');
+                        nikInput.classList.remove('border-green-500', 'bg-green-50');
+                    } else {
+                        // NIK belum terdaftar - OK
+                        nikVerified = true;
+                        showNikStatus('success', 'NIK belum terdaftar. Silakan lanjutkan mengisi formulir.');
+                        enableFormFields();
+                        nikInput.classList.add('border-green-500', 'bg-green-50');
+                        nikInput.classList.remove('border-red-500', 'bg-red-50');
+                        // Lock NIK input
+                        nikInput.readOnly = true;
+                        // Change button to "Ganti NIK"
+                        btn.innerHTML = '<i class="fas fa-edit"></i><span>Ganti NIK</span>';
+                        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        btn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    }
+                } else {
+                    showNikStatus('warning', result.error || 'Terjadi kesalahan saat mengecek NIK');
+                }
+            } catch (err) {
+                console.error('Check NIK error:', err);
+                showNikStatus('warning', 'Gagal mengecek NIK: ' + (err.message || String(err)));
+            }
+            
+            // Re-enable button
+            btn.disabled = false;
+            if (!nikVerified) {
+                btn.innerHTML = '<i class="fas fa-search"></i><span>Cek NIK</span>';
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                btn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+            }
+        });
+        
+        // Handle perubahan NIK (reset verifikasi)
+        document.getElementById('nik').addEventListener('input', function() {
+            if (nikVerified) {
+                // Jika sudah terverifikasi tapi user mengetik lagi, reset
+                // (Ini hanya terjadi jika readOnly di-bypass)
+            }
+            // Reset styling saat input berubah
+            this.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+        });
+        
+        // Cek NIK saat Enter di input NIK
+        document.getElementById('nik').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btnCheckNik').click();
+            }
+        });
 
         // =====================================================
         // SOLUSI CORS: Gunakan form submission via hidden iframe
@@ -997,6 +1227,13 @@
 
         form.addEventListener('submit', async function(event) {
             event.preventDefault();
+
+            // Cek apakah NIK sudah diverifikasi
+            if (!nikVerified) {
+                showNikStatus('warning', 'Silakan cek NIK terlebih dahulu sebelum mendaftar');
+                document.getElementById('nik').focus();
+                return;
+            }
 
             if (!form.checkValidity()) {
                 form.reportValidity();
