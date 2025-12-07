@@ -16,7 +16,7 @@ const SHEET_NAME = 'Sheet1';
 const UPLOAD_FOLDER_ID = '1b8chkM6Nj08IQwltXOQQ4A-p8uj0lwUl'; // Folder untuk bukti pembayaran
 
 // =====================================================
-// GET Request Handler - Untuk test, JSONP, dan getLatestFile
+// GET Request Handler - Untuk test, JSONP, checkNik, dan getLatestFile
 // =====================================================
 function doGet(e) {
   // Handle jika e undefined (dijalankan manual dari editor)
@@ -25,11 +25,16 @@ function doGet(e) {
   var callback = (e.parameter && e.parameter.callback) ? e.parameter.callback : '';
   var action = (e.parameter && e.parameter.action) ? e.parameter.action : 'test';
   var filename = (e.parameter && e.parameter.filename) ? e.parameter.filename : '';
+  var nik = (e.parameter && e.parameter.nik) ? e.parameter.nik : '';
   
   var result;
   
+  // Action: checkNik - cek apakah NIK sudah terdaftar
+  if (action === 'checkNik' && nik) {
+    result = checkNikExists(nik);
+  }
   // Action: getLatestFile - cari file berdasarkan nama di folder upload
-  if (action === 'getLatestFile' && filename) {
+  else if (action === 'getLatestFile' && filename) {
     result = getFileByName(filename);
   } 
   // Action: getRecentFiles - ambil 5 file terbaru
@@ -50,6 +55,67 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =====================================================
+// Check if NIK exists in spreadsheet
+// =====================================================
+function checkNikExists(nik) {
+  try {
+    if (!nik || nik.length !== 16) {
+      return { success: false, error: 'NIK tidak valid (harus 16 digit)' };
+    }
+    
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      // Coba sheet pertama
+      sheet = ss.getSheets()[0];
+    }
+    
+    var data = sheet.getDataRange().getValues();
+    var nikColumnIndex = -1;
+    
+    // Cari kolom NIK di header (baris pertama)
+    if (data.length > 0) {
+      for (var col = 0; col < data[0].length; col++) {
+        var header = String(data[0][col]).toLowerCase().trim();
+        if (header === 'nik' || header === 'nik (ktp)' || header.indexOf('nik') >= 0) {
+          nikColumnIndex = col;
+          break;
+        }
+      }
+    }
+    
+    // Jika tidak ditemukan kolom NIK, asumsikan kolom ke-3 (index 2) adalah NIK
+    // berdasarkan urutan: Timestamp, Nama, Tgl Lahir, NIK, ...
+    if (nikColumnIndex === -1) {
+      nikColumnIndex = 3; // Index 3 = kolom D (NIK)
+    }
+    
+    // Cek apakah NIK sudah ada
+    for (var row = 1; row < data.length; row++) { // Skip header
+      var cellValue = String(data[row][nikColumnIndex]).trim();
+      if (cellValue === nik) {
+        return { 
+          success: true, 
+          exists: true, 
+          message: 'NIK sudah terdaftar' 
+        };
+      }
+    }
+    
+    return { 
+      success: true, 
+      exists: false, 
+      message: 'NIK belum terdaftar' 
+    };
+    
+  } catch (err) {
+    Logger.log('checkNikExists error: ' + err.message);
+    return { success: false, error: err.message };
+  }
 }
 
 // =====================================================
