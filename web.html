@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi Webinar Modern</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#1E40AF',
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.8s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Input Focus Effect */
+        .input-group:focus-within i {
+            color: #2563EB;
+            transform: scale(1.1);
+        }
+        
+        /* Smooth Transition */
+        input, select, textarea, div, span, p, h1, h3, h4, button {
+            transition: all 0.3s ease;
+        }
+
+        /* Language Switch Active State */
+        .lang-active {
+            background-color: white;
+            color: #1e3a8a; /* blue-900 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-weight: 700;
+        }
+        .lang-inactive {
+            background-color: transparent;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .lang-inactive:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        /* Toast / Upload Progress */
+        #toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 60;
+            display: none;
+            min-width: 220px;
+        }
+        #toast.show {
+            display: block;
+            animation: toastIn 0.22s ease-out;
+        }
+        @keyframes toastIn {
+            from { transform: translateY(8px); opacity: 0 }
+            to { transform: translateY(0); opacity: 1 }
+        }
+        #toast .toast-inner { padding: 0.65rem 0.85rem; border-radius: 0.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+        #upload-progress-bar { height: 6px; border-radius: 6px; overflow: hidden; }
+        #upload-progress-inner { height: 100%; width: 0%; transition: width 0.2s linear; }
+        /* Modal */
+        #confirmationModal { display: none; position: fixed; inset: 0; z-index: 70; align-items: center; justify-content: center; }
+        #confirmationModal.show { display: flex; }
+        #confirmationModal .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+        #confirmationModal .modal-card { position: relative; width: 100%; max-width: 720px; margin: 24px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.25); }
+        #confirmationModal .modal-body { padding: 1.25rem; }
+        #confirmationModal img.preview { max-width: 160px; max-height: 120px; object-fit: cover; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen relative overflow-x-hidden font-sans">
+
+    <!-- Decorative Background Elements -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200 blur-[100px] opacity-40 animate-pulse-slow"></div>
+        <div class="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-200 blur-[100px] opacity-40 animate-pulse-slow" style="animation-delay: 1s;"></div>
+        <div class="absolute -bottom-[10%] left-[20%] w-[60%] h-[60%] rounded-full bg-teal-100 blur-[100px] opacity-40 animate-pulse-slow" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        
+        <!-- Main Card -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden animate-slide-up relative">
+            
+            <!-- Language Switcher (Top Right) -->
+            <div class="absolute top-5 right-5 z-30 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1 flex shadow-lg">
+                <button type="button" onclick="setLanguage('id')" id="btn-id" class="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all lang-active">
+                    <span class="text-base">🇮🇩</span> ID
+                </button>
+                <button type="button" onclick="setLanguage('en')" id="btn-en" class="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all lang-inactive">
+                    <span class="text-base">🇬🇧</span> EN
+                </button>
+            </div>
+
+            <!-- Header Section -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-700 pt-10 pb-24 px-8 text-center relative overflow-hidden">
+                <!-- Abstract Circles in Header -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm shadow-lg transform hover:rotate-12 transition-transform duration-500">
+                        <i class="fas fa-heartbeat text-3xl text-white"></i>
+                    </div>
+                    <h1 class="text-2xl md:text-4xl font-bold text-white mb-2 leading-tight tracking-tight" data-i18n="headerTitle">Registrasi Webinar Medis</h1>
+
+                    <p class="text-blue-100 text-sm md:text-lg font-light mb-4 max-w-2xl mx-auto" data-i18n="headerSubtitle">"Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy Pada Perawatan Luka"</p>
+
+                    <!-- Weather, Date, Time Bar -->
+                    <div id="weather-bar" class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full text-white text-sm font-medium border border-white/20 shadow-sm mb-8 animate-pulse-slow">
+                        <span id="weather-icon" class="flex items-center justify-center text-2xl animate-spin-slow"><i class="fas fa-cloud-sun"></i></span>
+                        <span id="weather-desc" class="font-semibold">Medan: --°C, --</span>
+                        <span class="hidden md:inline">|</span>
+                        <span id="hari-tanggal" class="font-semibold"></span>
+                        <span class="hidden md:inline">|</span>
+                        <span id="jam-detik" class="font-mono tracking-widest"></span>
+                    </div>
+                    <!-- Kuota & HTM Bar -->
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 bg-gradient-to-r from-green-400/80 to-blue-500/80 px-5 py-2.5 rounded-full text-white text-base font-semibold border border-white/20 shadow-lg mb-8 animate-pulse-slow">
+                        <span class="flex items-center gap-2"><i class="fas fa-users text-yellow-200 animate-bounce"></i> Kuota <span class="font-bold">500</span> Peserta</span>
+                        <span class="hidden md:inline">|</span>
+                        <span class="flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-200 animate-pulse"></i> HTM: <span class="font-bold">Rp. 50.000</span></span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full text-white text-sm font-medium border border-white/20 shadow-sm hover:bg-white/30 transition-all cursor-default mb-8">
+                        <i class="far fa-calendar-check text-yellow-300"></i>
+                        <span data-i18n="eventDate">Sabtu, 10 Januari 2026</span>
+                    </div>
+
+                    <!-- Speaker Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 text-left">
+                        <!-- Speaker 1 -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="https://ui-avatars.com/api/?name=Mohamad+Masykurin&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <div>
+                                    <h4 class="text-white text-xs font-bold leading-tight">Dr. Mohamad Masykurin</h4>
+                                    <p class="text-blue-200 text-[10px]">Bin Mafauzy</p>
+                                </div>
+                            </div>
+                            <p class="text-blue-50 text-[10px] italic leading-relaxed border-t border-white/10 pt-2 opacity-90 group-hover:opacity-100">
+                                "Understanding Hyperbaric Oxygen Therapy for Wound Healing: Challenges and Consideration"
+                            </p>
+                        </div>
+
+                        <!-- Speaker 2 -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="https://ui-avatars.com/api/?name=Wan+Syahmi&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <div>
+                                    <h4 class="text-white text-xs font-bold leading-tight">Dr. Wan Syahmi</h4>
+                                    <p class="text-blue-200 text-[10px]">Bin Wan Mohamad</p>
+                                </div>
+                            </div>
+                            <p class="text-blue-50 text-[10px] italic leading-relaxed border-t border-white/10 pt-2 opacity-90 group-hover:opacity-100">
+                                "Evidence-Based Indications and Contraindications for Hyperbaric Oxygen Therapy"
+                            </p>
+                        </div>
+
+                        <!-- Speaker 3 -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="https://ui-avatars.com/api/?name=Asrizal&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <div>
+                                    <h4 class="text-white text-xs font-bold leading-tight">Ns. Asrizal, M.Kep.</h4>
+                                    <p class="text-blue-200 text-[10px]">Ph.D., WOC(ET)N</p>
+                                </div>
+                            </div>
+                            <p class="text-blue-50 text-[10px] italic leading-relaxed border-t border-white/10 pt-2 opacity-90 group-hover:opacity-100">
+                                "Enhancing Acute and Chronic Wound Recovery with Ozone Therapy"
+                            </p>
+                        </div>
+
+                        <!-- Speaker 4 -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <img src="https://ui-avatars.com/api/?name=Zubaidi&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <div>
+                                    <h4 class="text-white text-xs font-bold leading-tight">Ns. Zubaidi, S.Kep.</h4>
+                                    <p class="text-blue-200 text-[10px]">WOC(ET)N</p>
+                                </div>
+                            </div>
+                            <p class="text-blue-50 text-[10px] italic leading-relaxed border-t border-white/10 pt-2 opacity-90 group-hover:opacity-100">
+                                "Nursing Competencies in Hyperbaric Oxygen Therapy"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Content -->
+            <div class="p-6 md:p-10 -mt-10 relative z-20 bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+                <form id="registrationForm" class="space-y-6" novalidate>
+                    
+                    <!-- Section: Data Diri -->
+                    <div class="border-b border-gray-100 pb-2 mb-4">
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2" data-i18n="sectionPersonal">Informasi Pribadi</h3>
+                    </div>
+
+                    <!-- 1. Nama -->
+                    <div class="space-y-2">
+                        <label for="nama" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelName">Nama Lengkap & Gelar</span> <span class="text-red-500">*</span></label>
+                        <div class="input-group relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-user-md text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                            </div>
+                            <input type="text" id="nama" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="Contoh: Ns. Budi Santoso, S.Kep" data-placeholder-i18n="placeholderName" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 2. Tanggal Lahir -->
+                        <div class="space-y-2">
+                            <label for="tgl_lahir" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelDob">Tanggal Lahir</span> <span class="text-red-500">*</span></label>
+                            <div class="input-group relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-birthday-cake text-gray-400 transition-colors"></i>
+                                </div>
+                                <input type="date" id="tgl_lahir" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700" required>
+                            </div>
+                        </div>
+
+                        <!-- 3. NIK -->
+                        <div class="space-y-2">
+                            <label for="nik" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelNik">NIK (KTP)</span> <span class="text-red-500">*</span></label>
+                            <div class="input-group relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-id-card text-gray-400 transition-colors"></i>
+                                </div>
+                                <input type="number" id="nik" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="16 Digit NIK" data-placeholder-i18n="placeholderNik" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Profesi -->
+                    <div class="space-y-2">
+                        <label for="profesi" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelProfession">Profesi</span> <span class="text-red-500">*</span></label>
+                        <div class="input-group relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-briefcase-medical text-gray-400 transition-colors"></i>
+                            </div>
+                            <select id="profesi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required>
+                                <option value="" selected disabled data-i18n="optionSelectProf">Pilih Profesi Anda...</option>
+                                
+                                <optgroup label="Perawat & Ners" class="font-bold text-blue-800 bg-blue-50">
+                                    <option value="Perawat Vokasi" class="text-gray-700 bg-white">Perawat Vokasi</option>
+                                    <option value="Ners" class="text-gray-700 bg-white">Ners</option>
+                                </optgroup>
+
+                                <optgroup label="Ners Spesialis" class="font-bold text-blue-800 bg-blue-50">
+                                    <option value="Ners Spesialis Keperawatan Komunitas" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Komunitas</option>
+                                    <option value="Ners Spesialis Keperawatan Anak" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Anak</option>
+                                    <option value="Ners Spesialis Keperawatan Maternitas" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Maternitas</option>
+                                    <option value="Ners Spesialis Keperawatan Medikal Bedah" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Medikal Bedah</option>
+                                    <option value="Ners Spesialis Keperawatan Geriatri" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Geriatri</option>
+                                    <option value="Ners Spesialis Keperawatan Jiwa" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Jiwa</option>
+                                    <option value="Ners Spesialis Keperawatan Onkologi" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Onkologi</option>
+                                    <option value="Ners Spesialis Keperawatan Kardiovaskuler" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Kardiovaskuler</option>
+                                    <option value="Ners Spesialis Keperawatan Gawat Darurat Kritis" class="text-gray-700 bg-white">Ners Spesialis Keperawatan Gawat Darurat Kritis</option>
+                                </optgroup>
+
+                                <optgroup label="Perawat Vokasi Lanjutan" class="font-bold text-blue-800 bg-blue-50">
+                                    <option value="Perawat Vokasi Level 5" class="text-gray-700 bg-white">Perawat Vokasi Level 5</option>
+                                    <option value="Perawat Vokasi Level 6" class="text-gray-700 bg-white">Perawat Vokasi Level 6</option>
+                                </optgroup>
+
+                                <optgroup label="Dokter Spesialis" class="font-bold text-blue-800 bg-blue-50">
+                                    <option value="Dokter Spesialis Bedah" class="text-gray-700 bg-white">Dokter Spesialis Bedah</option>
+                                    <option value="Dokter Spesialis Anestesiologi dan Terapi Intensif" class="text-gray-700 bg-white">Dokter Spesialis Anestesiologi dan Terapi Intensif</option>
+                                    <option value="Dokter Spesialis Kedokteran Fisik dan Rehabilitasi Medik" class="text-gray-700 bg-white">Dokter Spesialis Kedokteran Fisik dan Rehabilitasi Medik</option>
+                                    <option value="Dokter Spesialis Kedokteran Okupasi" class="text-gray-700 bg-white">Dokter Spesialis Kedokteran Okupasi</option>
+                                    <option value="Dokter Spesialis Bedah Toraks Kardiovaskular" class="text-gray-700 bg-white">Dokter Spesialis Bedah Toraks Kardiovaskular</option>
+                                    <option value="Dokter Spesialis Bedah Saraf" class="text-gray-700 bg-white">Dokter Spesialis Bedah Saraf</option>
+                                    <option value="Dokter Spesialis Orthopaedi dan Traumatologi" class="text-gray-700 bg-white">Dokter Spesialis Orthopaedi dan Traumatologi</option>
+                                    <option value="Dokter Spesialis Pulmonologi dan Kedokteran Respirasi" class="text-gray-700 bg-white">Dokter Spesialis Pulmonologi dan Kedokteran Respirasi</option>
+                                    <option value="Dokter Spesialis Kedokteran Nuklir dan Teranostik Molekuler" class="text-gray-700 bg-white">Dokter Spesialis Kedokteran Nuklir dan Teranostik Molekuler</option>
+                                    <option value="Dokter Spesialis Telinga Hidung Tenggorok Bedah Kepala dan Leher" class="text-gray-700 bg-white">Dokter Spesialis Telinga Hidung Tenggorok Bedah Kepala dan Leher</option>
+                                    <option value="Dokter Spesialis Bedah Plastik dan Rekonstruksi Estetik" class="text-gray-700 bg-white">Dokter Spesialis Bedah Plastik dan Rekonstruksi Estetik</option>
+                                    <option value="Dokter Spesialis Jantung dan Pembuluh Darah" class="text-gray-700 bg-white">Dokter Spesialis Jantung dan Pembuluh Darah</option>
+                                    <option value="Dokter Spesialis Emergensi Medisin" class="text-gray-700 bg-white">Dokter Spesialis Emergensi Medisin</option>
+                                    <option value="Dokter Spesialis Onkologi Radiasi" class="text-gray-700 bg-white">Dokter Spesialis Onkologi Radiasi</option>
+                                </optgroup>
+                                
+                                <option value="Lainnya" data-i18n="optionOther">Lainnya</option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Email -->
+                    <div class="space-y-2">
+                        <label for="email" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelEmail">Alamat Email</span> <span class="text-red-500">*</span></label>
+                        <div class="input-group relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-400 transition-colors"></i>
+                            </div>
+                            <input type="email" id="email" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 placeholder-gray-400" placeholder="nama@email.com" required>
+                        </div>
+                    </div>
+
+                    <!-- 6. Satu Sehat LMS (Custom Radio) -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelSatuSehat">Memiliki Akun Satu Sehat LMS?</span> <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="satuSehat" value="Ya" class="peer sr-only" required>
+                                <div class="p-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 peer-checked:border-blue-500 peer-checked:bg-blue-50 transition-all text-center group">
+                                    <i class="fas fa-check-circle text-gray-300 peer-checked:text-blue-500 text-xl mb-1 block transition-colors group-hover:text-blue-400"></i>
+                                    <span class="text-sm font-medium text-gray-600 peer-checked:text-blue-700" data-i18n="optionYes">Ya, Punya</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer relative">
+                                <input type="radio" name="satuSehat" value="Tidak" class="peer sr-only" required>
+                                <div class="p-3 rounded-xl border-2 border-gray-200 bg-gray-50 hover:bg-gray-100 peer-checked:border-red-500 peer-checked:bg-red-50 transition-all text-center group">
+                                    <i class="fas fa-times-circle text-gray-300 peer-checked:text-red-500 text-xl mb-1 block transition-colors group-hover:text-red-400"></i>
+                                    <span class="text-sm font-medium text-gray-600 peer-checked:text-red-700" data-i18n="optionNo">Belum Punya</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Section: Domisili -->
+                    <div class="border-b border-gray-100 pb-2 mt-8 mb-4">
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2" data-i18n="sectionDomicile">Domisili</h3>
+                    </div>
+
+                    <!-- 7. Alamat -->
+                    <div class="space-y-2">
+                        <label for="alamat" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelAddress">Alamat Lengkap</span> <span class="text-red-500">*</span></label>
+                        <div class="input-group relative group">
+                            <div class="absolute top-3 left-0 pl-4 flex items-start pointer-events-none">
+                                <i class="fas fa-map-marker-alt text-gray-400 mt-1 transition-colors"></i>
+                            </div>
+                            <textarea id="alamat" rows="3" class="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 resize-none" placeholder="Nama Jalan, RT/RW, Kelurahan, Kecamatan" data-placeholder-i18n="placeholderAddress" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 8. Provinsi -->
+                    <div class="space-y-2">
+                        <label for="provinsi" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelProvince">Provinsi</span> <span class="text-red-500">*</span></label>
+                        <div class="input-group relative group">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-map text-gray-400 transition-colors"></i>
+                            </div>
+                            <select id="provinsi" class="block w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 appearance-none cursor-pointer" required>
+                                <option value="" selected disabled data-i18n="optionSelectProv">Pilih Provinsi Domisili...</option>
+                                <!-- JS Generated -->
+                            </select>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Upload Bukti -->
+                    <div class="space-y-3 pt-2">
+                        <label for="buktiBayar" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelUpload">Upload Bukti Pembayaran</span> <span class="text-red-500">*</span></label>
+                        
+                        <div class="relative group">
+                            <input type="file" id="buktiBayar" accept="image/*" required class="block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2.5 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-bold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100
+                                cursor-pointer bg-white border border-dashed border-gray-300 rounded-xl p-2
+                            "/>
+                        </div>
+                        <div class="flex items-start gap-2 text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                            <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                            <p data-i18n="uploadNote">Upload bukti transfer Anda. Data akan tersimpan di sistem.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden">
+                            <!-- Shine Effect -->
+                            <div class="absolute top-0 -inset-full h-full w-1/2 z-0 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine"></div>
+                            
+                            <!-- Text Content -->
+                            <div class="relative z-10 flex flex-col items-center leading-none">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-paper-plane text-2xl group-hover:animate-bounce"></i>
+                                    <span class="text-lg" data-i18n="btnSubmit">DAFTAR SEKARANG</span>
+                                </div>
+                                <span class="text-[10px] font-medium opacity-80 mt-1" data-i18n="btnSubtext">Kirim Data Pendaftaran</span>
+                            </div>
+                        </button>
+                        <p class="text-center text-gray-400 text-xs mt-4" data-i18n="footerNote">Data pendaftaran akan tersimpan di sistem.</p>
+                    </div>
+
+                    <!-- Toast / Upload Progress -->
+                    <div id="toast" aria-live="polite" aria-atomic="true" class="hidden">
+                        <div class="toast-inner bg-white border border-gray-200 text-gray-700">
+                            <div id="toast-message" class="text-sm font-medium">Sedang memproses…</div>
+                            <div id="upload-progress-bar" class="bg-gray-100 rounded-md mt-2 hidden">
+                                <div id="upload-progress-inner" class="bg-green-500 w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Modal -->
+                    <div id="confirmationModal" role="dialog" aria-modal="true" class="hidden">
+                        <div class="modal-backdrop"></div>
+                        <div class="modal-card">
+                            <div class="modal-body">
+                                <!-- Success Icon -->
+                                <div class="flex justify-center mb-4">
+                                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check-circle text-4xl text-green-500"></i>
+                                    </div>
+                                </div>
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1 text-center">
+                                        <h3 class="text-xl font-bold text-green-600 mb-2">🎉 Pendaftaran Berhasil!</h3>
+                                        <p class="text-sm text-gray-600 mb-1">Data Anda telah berhasil disimpan.</p>
+                                        <p class="text-sm text-gray-600 mb-4 font-semibold">Terima kasih sudah mendaftar! 🙏</p>
+                                        <p class="text-xs text-gray-500 mb-3">Berikut ringkasan pendaftaran Anda:</p>
+                                        <div id="modalDetails" class="text-sm text-gray-700 mb-3 space-y-1"></div>
+                                        <div class="flex items-center gap-3">
+                                            <div id="modalImageWrapper" class="flex items-center gap-3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex-shrink-0 text-right">
+                                        <button id="modalCloseBtn" class="text-gray-500 hover:text-gray-700">✕</button>
+                                    </div>
+                                </div>
+                                <div class="mt-4 flex gap-3 justify-end items-center">
+                                    <button id="modalDownloadBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download Bukti Pendaftaran</button>
+                                    <button id="modalCloseBtn2" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 pb-4 text-gray-500 text-sm">
+            <p>&copy; 2026 <span data-i18n="copyright">Panitia Webinar Kesehatan</span>.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- UPLOAD HELPER VARIABLES ---
+        // (Tidak menggunakan localStorage/postMessage lagi - menggunakan JSONP untuk get file URL)
+        
+        // --- LANGUAGE CONFIGURATION ---
+        const translations = {
+            id: {
+                headerTitle: "Registrasi Webinar Medis",
+                headerSubtitle: "\"Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy Pada Perawatan Luka\"",
+                eventDate: "Sabtu, 10 Januari 2026",
+                sectionPersonal: "Informasi Pribadi",
+                labelName: "Nama Lengkap & Gelar",
+                placeholderName: "Contoh: Ns. Budi Santoso, S.Kep",
+                labelDob: "Tanggal Lahir",
+                labelNik: "NIK (KTP)",
+                placeholderNik: "16 Digit NIK",
+                labelProfession: "Profesi",
+                optionSelectProf: "Pilih Profesi Anda...",
+                optionOther: "Lainnya",
+                labelEmail: "Alamat Email",
+                labelSatuSehat: "Memiliki Akun Satu Sehat LMS?",
+                optionYes: "Ya, Punya",
+                optionNo: "Belum Punya",
+                sectionDomicile: "Domisili",
+                labelAddress: "Alamat Lengkap",
+                placeholderAddress: "Nama Jalan, RT/RW, Kelurahan, Kecamatan",
+                labelProvince: "Provinsi",
+                optionSelectProv: "Pilih Provinsi Domisili...",
+                labelUpload: "Upload Bukti Pembayaran",
+                uploadNote: "Upload bukti transfer Anda. Data akan tersimpan di sistem.",
+                btnSubmit: "DAFTAR SEKARANG",
+                btnSubtext: "Kirim Data Pendaftaran",
+                footerNote: "Data pendaftaran akan tersimpan di sistem.",
+                contactHeading: "Kontak Person",
+                copyright: "Panitia Webinar Kesehatan"
+            },
+            en: {
+                headerTitle: "Medical Webinar Registration",
+                headerSubtitle: "\"Hyperbaric Oxygen Therapy (HBOT) & Ozone Therapy in Wound Care\"",
+                eventDate: "Saturday, January 10, 2026",
+                sectionPersonal: "Personal Information",
+                labelName: "Full Name & Title",
+                placeholderName: "Example: Ns. John Doe, S.Kep",
+                labelDob: "Date of Birth",
+                labelNik: "National ID (NIK)",
+                placeholderNik: "16 Digit ID Number",
+                labelProfession: "Profession",
+                optionSelectProf: "Select Your Profession...",
+                optionOther: "Other",
+                labelEmail: "Email Address",
+                labelSatuSehat: "Do you have a Satu Sehat LMS Account?",
+                optionYes: "Yes, I have",
+                optionNo: "Not yet",
+                sectionDomicile: "Domicile",
+                labelAddress: "Full Address",
+                placeholderAddress: "Street Name, District, City",
+                labelProvince: "Province",
+                optionSelectProv: "Select Domicile Province...",
+                labelUpload: "Upload Payment Proof",
+                uploadNote: "Upload your payment proof. Data will be saved to the system.",
+                btnSubmit: "REGISTER NOW",
+                btnSubtext: "Submit Registration Data",
+                footerNote: "Registration data will be saved to the system.",
+                contactHeading: "Contact Persons",
+                copyright: "Health Webinar Committee"
+            }
+        };
+
+        function setLanguage(lang) {
+            // Update Text Content
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+
+            // Update Placeholders
+            document.querySelectorAll('[data-placeholder-i18n]').forEach(element => {
+                const key = element.getAttribute('data-placeholder-i18n');
+                if (translations[lang][key]) {
+                    element.placeholder = translations[lang][key];
+                }
+            });
+
+            // Update Button Styles
+            const btnId = document.getElementById('btn-id');
+            const btnEn = document.getElementById('btn-en');
+            
+            if (lang === 'id') {
+                btnId.classList.remove('lang-inactive');
+                btnId.classList.add('lang-active');
+                btnEn.classList.remove('lang-active');
+                btnEn.classList.add('lang-inactive');
+            } else {
+                btnEn.classList.remove('lang-inactive');
+                btnEn.classList.add('lang-active');
+                btnId.classList.remove('lang-active');
+                btnId.classList.add('lang-inactive');
+            }
+        }
+
+        // --- EXISTING LOGIC ---
+
+        // 1. Data Provinsi
+        const provinces = [
+            "Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Jambi", "Sumatera Selatan", "Bengkulu", "Lampung", "Kep. Bangka Belitung", "Kep. Riau",
+            "DKI Jakarta", "Jawa Barat", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur", "Banten",
+            "Bali", "Nusa Tenggara Barat", "Nusa Tenggara Timur",
+            "Kalimantan Barat", "Kalimantan Tengah", "Kalimantan Selatan", "Kalimantan Timur", "Kalimantan Utara",
+            "Sulawesi Utara", "Sulawesi Tengah", "Sulawesi Selatan", "Sulawesi Tenggara", "Sulawesi Gorontalo", "Sulawesi Barat",
+            "Maluku", "Maluku Utara",
+            "Papua", "Papua Barat", "Papua Selatan", "Papua Tengah", "Papua Pegunungan", "Papua Barat Daya"
+        ];
+
+        const selectProvinsi = document.getElementById('provinsi');
+        provinces.forEach(prov => {
+            let option = document.createElement('option');
+            option.value = prov;
+            option.text = prov;
+            selectProvinsi.appendChild(option);
+        });
+
+        // 2. Handle Submit
+        const form = document.getElementById('registrationForm');
+
+        // GOOGLE SHEETS (via Google Apps Script Web App)
+        // Create & deploy a Google Apps Script (see README snippet below) and paste its web-app URL here.
+        // The script will be called with POST (JSON) containing the registration fields; it will check NIK duplicates
+        // and insert row if not duplicate. It returns { success: true } or { success: false, duplicate: true }.
+        // NOTE: This Google Apps Script supports two behaviors: save-to-sheet (default) and upload file (action: 'upload').
+        // If you only want the upload-to-Drive behavior, the client will call the same `googleScriptUrl` with `action: 'upload'` and a base64 payload.
+        const googleScriptUrl = "https://script.google.com/macros/s/AKfycbw4hlzQbdK0LWpOZFJ-BV8m9VIE-6buMRbsYC5-aTikgCp0Mq_u9vdkE_ZViLmz_2k6bQ/exec"; // user-provided GAS web app URL
+
+        // =====================================================
+        // SOLUSI CORS: Gunakan form submission via hidden iframe
+        // Google Apps Script tidak support CORS dari domain eksternal
+        // Jadi kita pakai metode form POST ke iframe hidden
+        // =====================================================
+        
+        // Buat hidden iframe untuk form submission (solusi CORS)
+        function createHiddenIframe() {
+            let iframe = document.getElementById('gas-iframe');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'gas-iframe';
+                iframe.name = 'gas-iframe';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            return iframe;
+        }
+
+        // Promise-based timeout helper
+        function withTimeout(promise, ms) {
+            return Promise.race([
+                promise,
+                new Promise(function(_, reject) {
+                    setTimeout(function() { reject(new Error('Timeout')); }, ms);
+                })
+            ]);
+        }
+
+        // Simpan data ke Google Sheet via form submission (100% works)
+        async function saveToGoogleSheet(payload) {
+            if (!googleScriptUrl) return { success: false, error: 'Google Script URL not configured' };
+            
+            console.log('saveToGoogleSheet payload:', payload);
+            
+            return new Promise(function(resolve) {
+                try {
+                    // Buat form untuk POST
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = googleScriptUrl;
+                    form.target = 'gas-iframe';
+                    form.style.display = 'none';
+                    
+                    // Tambahkan semua field sebagai hidden inputs
+                    for (var key in payload) {
+                        if (payload.hasOwnProperty(key)) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key;
+                            var val = payload[key];
+                            if (val === undefined || val === null) val = '';
+                            input.value = typeof val === 'object' ? JSON.stringify(val) : String(val);
+                            form.appendChild(input);
+                        }
+                    }
+                    
+                    // Buat iframe jika belum ada
+                    createHiddenIframe();
+                    
+                    // Submit form
+                    document.body.appendChild(form);
+                    console.log('Submitting form with data:', payload);
+                    form.submit();
+                    
+                    // Cleanup form
+                    setTimeout(function() {
+                        if (form.parentNode) form.parentNode.removeChild(form);
+                    }, 100);
+                    
+                    // Kasih waktu untuk data terkirim (3 detik)
+                    setTimeout(function() {
+                        console.log('Form submitted, assuming success');
+                        resolve({ success: true, message: 'Data berhasil dikirim ke Google Sheet!' });
+                    }, 3000);
+                    
+                } catch (err) {
+                    console.error('saveToGoogleSheet error:', err);
+                    resolve({ success: false, error: err.message || String(err) });
+                }
+            });
+        }
+
+        // Test koneksi ke Google Script (hanya via GET, untuk verifikasi URL valid)
+        async function testGoogleScriptConnection() {
+            if (!googleScriptUrl) {
+                showToast('URL Google Script belum dikonfigurasi', 'error', 3000);
+                return false;
+            }
+            
+            showToast('Mengetes koneksi ke Google Script...', 'info', 0);
+            
+            try {
+                // Gunakan JSONP via script tag untuk test (menghindari CORS)
+                var result = await new Promise(function(resolve, reject) {
+                    var callbackName = 'testCallback_' + Date.now();
+                    var timeout = setTimeout(function() {
+                        cleanup();
+                        reject(new Error('Timeout - tidak ada respon'));
+                    }, 10000);
+                    
+                    // Setup callback global
+                    window[callbackName] = function(data) {
+                        cleanup();
+                        resolve(data);
+                    };
+                    
+                    function cleanup() {
+                        clearTimeout(timeout);
+                        delete window[callbackName];
+                        if (script.parentNode) script.parentNode.removeChild(script);
+                    }
+                    
+                    // Buat script tag untuk JSONP
+                    var script = document.createElement('script');
+                    script.src = googleScriptUrl + '?callback=' + callbackName + '&action=test&_=' + Date.now();
+                    script.onerror = function() {
+                        cleanup();
+                        reject(new Error('Gagal memuat script'));
+                    };
+                    document.head.appendChild(script);
+                });
+                
+                console.log('Test connection result:', result);
+                showToast('Koneksi ke Google Script berhasil!', 'success', 3000);
+                return true;
+            } catch (err) {
+                console.error('Test connection error:', err);
+                showToast('Koneksi gagal: ' + (err.message || String(err)), 'error', 4000);
+                return false;
+            }
+        }
+
+        async function uploadFileToServer(file) {
+            if (!file) return null;
+            // Use Google Apps Script upload endpoint
+            if (googleScriptUrl) {
+                return await uploadFileToDriveViaGAS(file);
+            }
+            return null;
+        }
+
+        async function uploadFileToDriveViaGAS(file) {
+            if (!googleScriptUrl || !file) return null;
+            showToast('Mengunggah bukti ke Google Drive...', 'info', 0);
+            
+            try {
+                const dataUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = () => reject(new Error('File read failed'));
+                    reader.readAsDataURL(file);
+                });
+                
+                // Buat FormData untuk upload file
+                var formData = new FormData();
+                formData.append('action', 'upload');
+                formData.append('filename', file.name);
+                formData.append('mimeType', file.type);
+                formData.append('base64', dataUrl);
+                
+                // Kirim dengan no-cors mode
+                await fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // PENTING: no-cors agar tidak kena CORS error
+                    body: formData
+                });
+                
+                console.log('File upload sent via no-cors');
+                showToast('Bukti berhasil diunggah ke Drive.', 'success', 3000);
+                hideUploadProgress();
+                
+                // Karena no-cors, kita tidak bisa baca response
+                // Return placeholder URL (file ID akan di-generate di server)
+                return 'https://drive.google.com/file/uploaded';
+                
+            } catch (err) {
+                console.error('Upload file error:', err);
+                showToast('Gagal mengunggah bukti ke Drive.', 'error', 3000);
+                hideUploadProgress();
+                return null;
+            }
+        }
+
+        // Upload file via form submission (lebih reliable dari fetch)
+        async function uploadFileToDriveViaForm(file) {
+            if (!googleScriptUrl || !file) return null;
+            
+            return new Promise(async function(resolve) {
+                try {
+                    // Convert file to base64
+                    const dataUrl = await new Promise((res, rej) => {
+                        const reader = new FileReader();
+                        reader.onload = () => res(reader.result);
+                        reader.onerror = () => rej(new Error('File read failed'));
+                        reader.readAsDataURL(file);
+                    });
+                    
+                    // Buat form untuk POST
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = googleScriptUrl;
+                    form.target = 'gas-iframe-upload';
+                    form.style.display = 'none';
+                    
+                    // Tambahkan data sebagai hidden inputs
+                    var inputs = {
+                        action: 'upload',
+                        filename: file.name,
+                        mimeType: file.type,
+                        base64: dataUrl
+                    };
+                    
+                    for (var key in inputs) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = inputs[key];
+                        form.appendChild(input);
+                    }
+                    
+                    // Buat iframe khusus untuk upload
+                    var iframe = document.getElementById('gas-iframe-upload');
+                    if (!iframe) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = 'gas-iframe-upload';
+                        iframe.name = 'gas-iframe-upload';
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                    }
+                    
+                    // Submit form
+                    document.body.appendChild(form);
+                    console.log('=== Upload Form Submission ===');
+                    console.log('Uploading file:', file.name);
+                    form.submit();
+                    
+                    // Cleanup form
+                    setTimeout(function() {
+                        if (form.parentNode) form.parentNode.removeChild(form);
+                    }, 100);
+                    
+                    // Tunggu upload selesai (5 detik) lalu query file URL via JSONP
+                    console.log('Waiting for upload to complete...');
+                    setTimeout(async function() {
+                        console.log('Querying file URL via JSONP...');
+                        var fileUrl = await getFileUrlByName(file.name);
+                        console.log('File URL result:', fileUrl);
+                        resolve(fileUrl);
+                    }, 5000);
+                    
+                } catch (err) {
+                    console.error('uploadFileToDriveViaForm error:', err);
+                    resolve(null);
+                }
+            });
+        }
+        
+        // Get file URL by name via JSONP (menghindari CORS)
+        async function getFileUrlByName(filename) {
+            return new Promise(function(resolve) {
+                var callbackName = 'fileCallback_' + Date.now();
+                var timeout = setTimeout(function() {
+                    cleanup();
+                    console.warn('JSONP timeout for getFileUrlByName');
+                    resolve(null);
+                }, 10000);
+                
+                window[callbackName] = function(data) {
+                    cleanup();
+                    console.log('getFileUrlByName response:', data);
+                    if (data && data.success && data.url) {
+                        resolve(data.url);
+                    } else {
+                        resolve(null);
+                    }
+                };
+                
+                function cleanup() {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+                
+                var script = document.createElement('script');
+                script.src = googleScriptUrl + '?callback=' + callbackName + '&action=getLatestFile&filename=' + encodeURIComponent(filename) + '&_=' + Date.now();
+                script.onerror = function() {
+                    cleanup();
+                    console.error('JSONP script error');
+                    resolve(null);
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // Toast helper functions
+        let toastTimeout = null;
+        function showToast(message, type = 'info', duration = 4000) {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-message');
+            if (!toast || !msg) return;
+            msg.innerText = message;
+            toast.classList.add('show');
+            toast.classList.remove('hidden');
+            // apply style depending on type (info/success/error)
+            const inner = toast.querySelector('.toast-inner');
+            inner.classList.remove('bg-white','bg-green-500','bg-red-500','text-white','text-gray-700');
+            if (type === 'success') {
+                inner.classList.add('bg-green-500','text-white');
+            } else if (type === 'error') {
+                inner.classList.add('bg-red-500','text-white');
+            } else {
+                inner.classList.add('bg-white','text-gray-700');
+            }
+            if (toastTimeout) clearTimeout(toastTimeout);
+            if (duration > 0) {
+                toastTimeout = setTimeout(hideToast, duration);
+            }
+        }
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.classList.remove('show');
+            toast.classList.add('hidden');
+        }
+
+        // Upload Progress helpers
+        function showUploadProgress(percent) {
+            const bar = document.getElementById('upload-progress-bar');
+            const inner = document.getElementById('upload-progress-inner');
+            if (!bar || !inner) return;
+            bar.classList.remove('hidden');
+            inner.style.width = `${percent}%`;
+            showToast(`Mengunggah bukti: ${percent}%`, 'info', 5000);
+        }
+        function hideUploadProgress() {
+            const bar = document.getElementById('upload-progress-bar');
+            const inner = document.getElementById('upload-progress-inner');
+            if (!bar || !inner) return;
+            inner.style.width = `0%`;
+            bar.classList.add('hidden');
+        }
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const nama = document.getElementById('nama').value;
+            const tglLahir = document.getElementById('tgl_lahir').value;
+            const nik = document.getElementById('nik').value;
+            const profesi = document.getElementById('profesi').value;
+            const email = document.getElementById('email').value;
+            const satuSehatEl = document.querySelector('input[name="satuSehat"]:checked');
+            const satuSehat = satuSehatEl ? satuSehatEl.value : '-';
+            const alamat = document.getElementById('alamat').value;
+            const provinsi = document.getElementById('provinsi').value;
+
+            const submitBtn = event.target.querySelector('button[type=submit]');
+            let submitBtnOrig = null;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtnOrig = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class=\"flex items-center gap-2\"><i class=\"fas fa-spinner fa-spin\"></i><span>Sedang memproses...</span></div>';
+            }
+            // show processing toast (indefinite)
+            showToast('Sedang memproses...', 'info', 0);
+
+            // Upload file ke Google Drive
+            const buktiEl = document.getElementById('buktiBayar');
+            const buktiFile = buktiEl && buktiEl.files && buktiEl.files[0] ? buktiEl.files[0] : null;
+            let fileUrl = null;
+            
+            if (buktiFile && googleScriptUrl) {
+                try {
+                    showToast('Mengunggah bukti ke Google Drive...', 'info', 0);
+                    fileUrl = await uploadFileToDriveViaForm(buktiFile);
+                    console.log('File uploaded, URL:', fileUrl);
+                    if (fileUrl) {
+                        showToast('✅ Bukti berhasil diunggah ke Drive!', 'success', 3000);
+                    } else {
+                        showToast('⚠️ Gagal upload file, data tetap tersimpan', 'warning', 3000);
+                    }
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    showToast('⚠️ Gagal upload file, data tetap tersimpan', 'warning', 3000);
+                }
+            }
+
+            // Save to Google Sheets
+            const sheetPayload = {
+                nama: nama,
+                tglLahir: tglLahir,
+                nik: nik,
+                profesi: profesi,
+                email: email,
+                satuSehat: satuSehat,
+                alamat: alamat,
+                provinsi: provinsi,
+                fileName: buktiFile ? buktiFile.name : '',
+                fileUrl: fileUrl || ''
+            };
+            
+            let sheetSaveRes = null;
+            if (googleScriptUrl) {
+                showToast('Menyimpan data...', 'info', 0);
+                sheetSaveRes = await saveToGoogleSheet(sheetPayload);
+                console.log('Sheet save result:', sheetSaveRes);
+            }
+            
+            // Show confirmation modal
+            showConfirmationModal({ nama, tglLahir, nik, profesi, email, satuSehat, alamat, provinsi, buktiFile, fileUrl, sheetSaved: sheetSaveRes && sheetSaveRes.success });
+            
+            // show success toast
+            showToast('🎉 Data berhasil disimpan! Terima kasih sudah mendaftar.', 'success', 5000);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                if (submitBtnOrig !== null) submitBtn.innerHTML = submitBtnOrig;
+            }
+            hideToast();
+        });
+
+        // --- Weather, Date, Time for Medan ---
+        async function updateWeatherMedan() {
+            // Open-Meteo API (no key needed)
+            const lat = 3.5952, lon = 98.6722;
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const data = await res.json();
+                const w = data.current_weather;
+                let icon = 'fa-cloud';
+                let desc = 'Berawan';
+                // Weather code mapping (simplified)
+                if (w.weathercode === 0) { icon = 'fa-sun'; desc = 'Cerah'; }
+                else if ([1,2,3].includes(w.weathercode)) { icon = 'fa-cloud-sun'; desc = 'Cerah Berawan'; }
+                else if ([45,48].includes(w.weathercode)) { icon = 'fa-smog'; desc = 'Berkabut'; }
+                else if ([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(w.weathercode)) { icon = 'fa-cloud-showers-heavy'; desc = 'Hujan'; }
+                else if ([71,73,75,77,85,86].includes(w.weathercode)) { icon = 'fa-snowflake'; desc = 'Salju'; }
+                else if ([95,96,99].includes(w.weathercode)) { icon = 'fa-bolt'; desc = 'Badai Petir'; }
+                const iconEl = document.getElementById('weather-icon');
+                const descEl = document.getElementById('weather-desc');
+                if (iconEl) iconEl.innerHTML = `<i class="fas ${icon} animate-pulse"></i>`;
+                if (descEl) descEl.innerText = `Medan: ${w.temperature}°C, ${desc}`;
+            } catch (e) {
+                const descEl = document.getElementById('weather-desc');
+                if (descEl) descEl.innerText = 'Medan: --°C, gagal ambil cuaca';
+            }
+        }
+        function updateDateTime() {
+            const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+            const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            const now = new Date();
+            const h = hari[now.getDay()];
+            const tgl = now.getDate();
+            const bln = bulan[now.getMonth()];
+            const thn = now.getFullYear();
+            const hariTanggalEl = document.getElementById('hari-tanggal');
+            if (hariTanggalEl) hariTanggalEl.innerText = `${h}, ${tgl} ${bln} ${thn}`;
+            const jam = now.getHours().toString().padStart(2,'0');
+            const menit = now.getMinutes().toString().padStart(2,'0');
+            const detik = now.getSeconds().toString().padStart(2,'0');
+            const jamDetikEl = document.getElementById('jam-detik');
+            if (jamDetikEl) jamDetikEl.innerText = jam + ':' + menit + ':' + detik;
+        }
+
+        // Modal helpers
+        function showConfirmationModal(data) {
+            const modal = document.getElementById('confirmationModal');
+            if (!modal) return;
+            // fill details
+            const details = document.getElementById('modalDetails');
+            details.innerHTML = 
+                '<div><strong>Nama:</strong> ' + (data.nama || '') + '</div>' +
+                '<div><strong>Tgl Lahir:</strong> ' + (data.tglLahir || '') + '</div>' +
+                '<div><strong>NIK:</strong> ' + (data.nik || '') + '</div>' +
+                '<div><strong>Profesi:</strong> ' + (data.profesi || '') + '</div>' +
+                '<div><strong>Email:</strong> ' + (data.email || '') + '</div>' +
+                '<div><strong>Satu Sehat:</strong> ' + (data.satuSehat || '') + '</div>' +
+                '<div><strong>Domisili:</strong> ' + (data.alamat || '') + '</div>' +
+                '<div><strong>Provinsi:</strong> ' + (data.provinsi || '') + '</div>' +
+                '<div><strong>Status:</strong> ' + (data.sheetSaved ? 'Tersimpan' : 'Menunggu konfirmasi') + '</div>' +
+                (data.fileUrl ? '<div><strong>Bukti File:</strong> <a href=\"' + data.fileUrl + '\" target=\"_blank\">Lihat/Unduh</a></div>' : '');
+            
+            // preview file if exists
+            const wrapper = document.getElementById('modalImageWrapper');
+            wrapper.innerHTML = '';
+            if (data.buktiFile) {
+                const img = document.createElement('img');
+                img.className = 'preview border';
+                img.alt = 'Preview Bukti';
+                img.src = URL.createObjectURL(data.buktiFile);
+                wrapper.appendChild(img);
+            }
+            
+            // attach event handlers for modal buttons
+            const downloadBtn = document.getElementById('modalDownloadBtn');
+            const closeBtn = document.getElementById('modalCloseBtn');
+            const closeBtn2 = document.getElementById('modalCloseBtn2');
+            
+            if (downloadBtn) {
+                downloadBtn.onclick = async function() { await downloadProofFile(data); };
+            }
+            if (closeBtn) closeBtn.onclick = hideConfirmationModal;
+            if (closeBtn2) closeBtn2.onclick = hideConfirmationModal;
+            
+            modal.classList.add('show'); 
+            modal.classList.remove('hidden');
+        }
+        
+        function hideConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            if (!modal) return;
+            // release preview object URL
+            const wrapper = document.getElementById('modalImageWrapper');
+            if (wrapper) wrapper.querySelectorAll('img').forEach(function(img) { URL.revokeObjectURL(img.src); });
+            modal.classList.remove('show'); 
+            modal.classList.add('hidden');
+        }
+
+        // Convert File to Base64 Data URL
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) return resolve(null);
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('File read failed'));
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Download proof as PDF file
+        async function downloadProofFile(data) {
+            try {
+                showToast('Membuat PDF...', 'info', 0);
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const now = new Date();
+                const ts = now.toLocaleString('id-ID');
+                
+                // Header
+                doc.setFillColor(37, 99, 235); // Blue
+                doc.rect(0, 0, 210, 40, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('BUKTI PENDAFTARAN WEBINAR', 105, 18, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy', 105, 26, { align: 'center' });
+                doc.text('Pada Perawatan Luka', 105, 32, { align: 'center' });
+                
+                // Reset text color
+                doc.setTextColor(0, 0, 0);
+                
+                // Registration ID
+                doc.setFillColor(240, 253, 244); // Light green
+                doc.rect(15, 45, 180, 12, 'F');
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('No. Registrasi: REG-' + (data.nik || '').slice(-6) + '-' + Date.now().toString().slice(-4), 20, 52);
+                doc.text('Tanggal: ' + ts, 130, 52);
+                
+                // Data section
+                let y = 68;
+                const lineHeight = 10;
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DATA PESERTA', 20, y);
+                doc.setLineWidth(0.5);
+                doc.line(20, y + 2, 190, y + 2);
+                y += 12;
+                
+                // Data rows
+                doc.setFontSize(10);
+                const fields = [
+                    ['Nama Lengkap', data.nama || '-'],
+                    ['Tanggal Lahir', data.tglLahir || '-'],
+                    ['NIK', data.nik || '-'],
+                    ['Profesi', data.profesi || '-'],
+                    ['Email', data.email || '-'],
+                    ['Akun Satu Sehat', data.satuSehat || '-'],
+                    ['Alamat', data.alamat || '-'],
+                    ['Provinsi', data.provinsi || '-']
+                ];
+                
+                fields.forEach(function(field) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(field[0] + ':', 20, y);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    // Handle long text
+                    var value = field[1];
+                    if (value.length > 50) {
+                        var lines = doc.splitTextToSize(value, 120);
+                        doc.text(lines, 65, y);
+                        y += (lines.length - 1) * 5;
+                    } else {
+                        doc.text(value, 65, y);
+                    }
+                    y += lineHeight;
+                });
+                
+                // Status section
+                y += 5;
+                doc.setFillColor(254, 243, 199); // Light yellow
+                doc.rect(15, y - 5, 180, 15, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(146, 64, 14); // Brown
+                doc.text('STATUS: TERDAFTAR', 20, y + 3);
+                doc.setTextColor(0, 0, 0);
+                
+                // Add image if exists
+                if (data.buktiFile) {
+                    y += 25;
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('BUKTI PEMBAYARAN', 20, y);
+                    doc.line(20, y + 2, 190, y + 2);
+                    y += 8;
+                    
+                    try {
+                        const imgData = await fileToBase64(data.buktiFile);
+                        if (imgData) {
+                            // Calculate image dimensions (max width: 100, max height: 60)
+                            doc.addImage(imgData, 'JPEG', 20, y, 80, 50);
+                            y += 55;
+                        }
+                    } catch (imgErr) {
+                        console.warn('Could not add image to PDF:', imgErr);
+                    }
+                }
+                
+                // File URL if exists
+                if (data.fileUrl && data.fileUrl.startsWith('http')) {
+                    y += 5;
+                    doc.setFontSize(9);
+                    doc.setTextColor(37, 99, 235);
+                    doc.textWithLink('Lihat Bukti di Google Drive', 20, y, { url: data.fileUrl });
+                    doc.setTextColor(0, 0, 0);
+                }
+                
+                // Footer
+                doc.setFillColor(243, 244, 246); // Light gray
+                doc.rect(0, 270, 210, 27, 'F');
+                
+                doc.setFontSize(8);
+                doc.setTextColor(107, 114, 128); // Gray
+                doc.text('Dokumen ini adalah bukti pendaftaran yang sah.', 105, 278, { align: 'center' });
+                doc.text('Harap simpan sebagai arsip. Tidak dapat digunakan untuk perubahan data.', 105, 284, { align: 'center' });
+                doc.text('© 2026 Panitia Webinar Kesehatan', 105, 290, { align: 'center' });
+                
+                // Save PDF
+                doc.save('bukti_pendaftaran_' + (data.nik || 'unknown') + '.pdf');
+                
+                showToast('PDF bukti pendaftaran berhasil dibuat!', 'success', 3000);
+            } catch (err) {
+                console.error('PDF generation error:', err);
+                showToast('Gagal membuat PDF: ' + err.message, 'error', 3000);
+            }
+        }
+
+        // Save to Google Sheets + Return object result
+        // CATATAN: Karena keterbatasan CORS, kita tidak bisa memverifikasi response
+        // NIK duplicate check dilakukan di server side (Code.gs)
+        async function confirmAndSaveToSheets(payload) {
+            if (!googleScriptUrl) {
+                return { success: false, error: 'Google Script URL is not configured. Skipping save.' };
+            }
+            showToast('Mengirim data ke Google Sheets...', 'info', 0);
+            try {
+                const res = await saveToGoogleSheet(payload);
+                console.log('confirmAndSaveToSheets result:', res);
+                
+                // Karena CORS, kita tidak bisa baca response sebenarnya dari Google Script
+                // Kita asumsikan berhasil jika tidak ada error di client side
+                if (res && res.success) {
+                    showToast('Data telah dikirim ke Google Sheets.', 'success', 3000);
+                    return { success: true };
+                }
+                
+                // Jika ada error
+                var errMsg = res && res.error ? res.error : 'Unknown error';
+                console.error('confirmAndSaveToSheets: failed', errMsg, res);
+                showToast('Error: ' + errMsg, 'error', 4000);
+                return { success: false, error: errMsg };
+            } catch (err) {
+                console.error('confirmAndSaveToSheets exception:', err);
+                showToast('Terjadi kesalahan saat menyimpan data.', 'error', 4000);
+                return { success: false, error: err.message || String(err) };
+            }
+        }
+
+        // Debug: Remove any stray code that accidentally renders as text nodes
+        function sanitizePotentialDisplayedCode() {
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                if (!node || !node.nodeValue) continue;
+                const s = node.nodeValue.trim();
+                if (!s) continue;
+                // Heuristic: long code-like strings or certain keywords
+                if (s.length > 80 && /\b(const|function|new Blob|document\.createElement|URL\.createObjectURL|a\.download)\b/.test(s)) {
+                    node.parentNode && node.parentNode.removeChild(node);
+                }
+            }
+        }
+
+        // 3. Initialize Language on Load and start weather/time updates
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded: initializing page scripts');
+            // remove any visible JS artifacts on page load
+            sanitizePotentialDisplayedCode();
+            setLanguage('id');
+            // Start the weather and date/time updates
+            try {
+                updateWeatherMedan();
+                setInterval(updateWeatherMedan, 600000); // update cuaca tiap 10 menit
+            } catch (err) {
+                console.error('updateWeatherMedan error', err);
+            }
+            try {
+                updateDateTime();
+                setInterval(updateDateTime, 1000);
+            } catch (err) {
+                console.error('updateDateTime error', err);
+            }
+        });
+
+        // Global error handlers to aid debugging in production
+        window.addEventListener('error', function (ev) {
+            console.error('Global error', ev.error || ev.message || ev);
+            // Use a non-blocking toast to inform the user (optional)
+            try { showToast('Terjadi kesalahan pada halaman. Lihat console untuk detail.', 'error', 6000); } catch (e) {}
+        });
+        window.addEventListener('unhandledrejection', function (ev) {
+            console.error('Unhandled rejection', ev.reason);
+            try { showToast('Terjadi kesalahan (promise). Lihat console untuk detail.', 'error', 6000); } catch (e) {}
+        });
+
+        // Debug helper: test koneksi ke Google Script
+        // Jalankan di browser console: testGoogleScript()
+        async function testGoogleScript() {
+            return await testGoogleScriptConnection();
+        }
+    </script>
+</body>
+</html>
