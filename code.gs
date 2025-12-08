@@ -12,7 +12,7 @@
 // =====================================================
 
 const SPREADSHEET_ID = '1uzlCF1sO0ozjpkHhyA2JhutD-FNeI8VbgAQiBMERucU';
-const SHEET_NAME = 'Sheet1';
+const SHEET_NAME = 'Registrasi2026';
 const UPLOAD_FOLDER_ID = '1b8chkM6Nj08IQwltXOQQ4A-p8uj0lwUl'; // Folder untuk bukti pembayaran
 
 // =====================================================
@@ -26,12 +26,22 @@ function doGet(e) {
   var action = (e.parameter && e.parameter.action) ? e.parameter.action : 'test';
   var filename = (e.parameter && e.parameter.filename) ? e.parameter.filename : '';
   var nik = (e.parameter && e.parameter.nik) ? e.parameter.nik : '';
+  var username = (e.parameter && e.parameter.username) ? e.parameter.username : '';
+  var password = (e.parameter && e.parameter.password) ? e.parameter.password : '';
   
   var result;
   
+  // Action: validateLogin - validasi username dan password
+  if (action === 'validateLogin' && username && password) {
+    result = validateAdminLogin(username, password);
+  }
   // Action: checkNik - cek apakah NIK sudah terdaftar
-  if (action === 'checkNik' && nik) {
+  else if (action === 'checkNik' && nik) {
     result = checkNikExists(nik);
+  }
+  // Action: getDataByNik - ambil data pendaftaran berdasarkan NIK
+  else if (action === 'getDataByNik' && nik) {
+    result = getDataByNik(nik);
   }
   // Action: getLatestFile - cari file berdasarkan nama di folder upload
   else if (action === 'getLatestFile' && filename) {
@@ -40,6 +50,19 @@ function doGet(e) {
   // Action: getRecentFiles - ambil 5 file terbaru
   else if (action === 'getRecentFiles') {
     result = getRecentFiles(5);
+  }
+  // Action: getAllData - ambil semua data untuk admin dashboard
+  else if (action === 'getAllData') {
+    result = getAllData();
+  }
+  // Action: updateData - update data pendaftar
+  else if (action === 'updateData') {
+    result = updateData(e.parameter);
+  }
+  // Action: deleteData - hapus data pendaftar (menggunakan NIK sebagai identifier utama)
+  else if (action === 'deleteData') {
+    var deleteNik = e.parameter.deleteNik || '';
+    result = deleteData(parseInt(e.parameter.rowIndex), deleteNik);
   }
   else {
     result = { success: true, message: 'API is working!', timestamp: new Date().toISOString() };
@@ -55,6 +78,40 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// =====================================================
+// Validate Admin Login
+// =====================================================
+function validateAdminLogin(username, password) {
+  try {
+    // Admin credentials (stored safely, hanya dilihat di backend)
+    const ADMIN_USERNAME = 'admin';
+    const ADMIN_PASSWORD = 'webinar2026'; // Simpan password plain text, validasi di server saja
+    
+    // Validasi username
+    if (username !== ADMIN_USERNAME) {
+      return { status: 'error', message: 'Username atau password salah!' };
+    }
+    
+    // Validasi password (direct comparison)
+    if (password !== ADMIN_PASSWORD) {
+      return { status: 'error', message: 'Username atau password salah!' };
+    }
+    
+    // Generate token (simple timestamp-based token)
+    const token = Utilities.getUuid();
+    const timestamp = new Date().getTime();
+    
+    return {
+      status: 'success',
+      message: 'Login berhasil',
+      token: token,
+      expiresAt: timestamp + (24 * 60 * 60 * 1000) // 24 jam
+    };
+  } catch (error) {
+    return { status: 'error', message: 'Server error: ' + error.toString() };
+  }
 }
 
 // =====================================================
@@ -94,14 +151,36 @@ function checkNikExists(nik) {
       nikColumnIndex = 3; // Index 3 = kolom D (NIK)
     }
     
-    // Cek apakah NIK sudah ada
+    // Cek apakah NIK sudah ada dan ambil datanya
     for (var row = 1; row < data.length; row++) { // Skip header
       var cellValue = String(data[row][nikColumnIndex]).trim();
       if (cellValue === nik) {
+        // Ambil data pendaftaran
+        var rowData = data[row];
+        var headers = data[0];
+        var registrationData = {};
+        
+        for (var col = 0; col < headers.length; col++) {
+          var headerName = String(headers[col]).toLowerCase().replace(/\s+/g, '').replace(/\./g, '');
+          registrationData[headerName] = rowData[col];
+        }
+        
         return { 
           success: true, 
           exists: true, 
-          message: 'NIK sudah terdaftar' 
+          message: 'NIK sudah terdaftar',
+          data: {
+            noRegistrasi: rowData[1] || '',
+            nama: rowData[2] || '',
+            tglLahir: rowData[3] || '',
+            nik: rowData[4] || '',
+            profesi: rowData[5] || '',
+            email: rowData[6] || '',
+            satuSehat: rowData[7] || '',
+            alamat: rowData[8] || '',
+            provinsi: rowData[9] || '',
+            timestamp: rowData[0] || ''
+          }
         };
       }
     }
@@ -255,6 +334,10 @@ function parseRequest(e) {
 // Simpan data ke Google Sheet
 // =====================================================
 function saveToSheet(body) {
+  Logger.log('=== saveToSheet called ===');
+  Logger.log('Body received: ' + JSON.stringify(body));
+  Logger.log('noRegistrasi value: ' + body.noRegistrasi);
+  
   // Validasi NIK
   if (!body.nik) {
     return jsonResponse({ success: false, error: 'NIK wajib diisi' });
@@ -271,14 +354,14 @@ function saveToSheet(body) {
   // Setup headers jika sheet kosong
   var lastRow = sheet.getLastRow();
   if (lastRow === 0) {
-    var headers = ['Timestamp', 'Nama', 'TglLahir', 'NIK', 'Profesi', 'Email', 'SatuSehat', 'Alamat', 'Provinsi', 'FileName', 'FileUrl'];
+    var headers = ['Timestamp', 'No. Registrasi', 'Nama', 'TglLahir', 'NIK', 'Profesi', 'Email', 'SatuSehat', 'Alamat', 'Provinsi', 'FileName', 'FileUrl'];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     lastRow = 1;
   }
   
   // Cek duplikat NIK
-  var nikCol = 4; // Kolom D
+  var nikCol = 5; // Kolom E (NIK sekarang di kolom 5 karena ada No. Registrasi)
   if (lastRow > 1) {
     var nikValues = sheet.getRange(2, nikCol, lastRow - 1, 1).getValues();
     var incomingNik = String(body.nik).trim();
@@ -297,6 +380,7 @@ function saveToSheet(body) {
   // Tambah baris baru
   var newRow = [
     new Date(),
+    body.noRegistrasi || '',
     body.nama || '',
     body.tglLahir || '',
     body.nik || '',
@@ -313,7 +397,7 @@ function saveToSheet(body) {
   
   // Set FileUrl sebagai hyperlink yang bisa diklik
   var newRowNum = sheet.getLastRow();
-  var fileUrlCol = 11; // Kolom K (FileUrl)
+  var fileUrlCol = 12; // Kolom L (FileUrl sekarang di kolom 12)
   
   if (body.fileUrl && body.fileUrl.startsWith('http')) {
     var cell = sheet.getRange(newRowNum, fileUrlCol);
@@ -475,4 +559,245 @@ function testDirectAppend() {
   } catch (err) {
     Logger.log('ERROR: ' + err.message);
   }
+}
+
+// =====================================================
+// Get all data for Admin Dashboard
+// =====================================================
+function getAllData() {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      return { status: 'success', data: [] };
+    }
+    
+    var lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return { status: 'success', data: [] };
+    }
+    
+    var data = sheet.getDataRange().getValues();
+    
+    // Get formulas for FileUrl column (column L = 12)
+    var fileUrlFormulas = sheet.getRange(2, 12, lastRow - 1, 1).getFormulas();
+    var fileUrlValues = sheet.getRange(2, 12, lastRow - 1, 1).getValues();
+    
+    var result = [];
+    
+    // Headers: Timestamp, No. Registrasi, Nama, TglLahir, NIK, Profesi, Email, SatuSehat, Alamat, Provinsi, FileName, FileUrl
+    for (var i = 1; i < data.length; i++) {
+      // Get fileUrl - try formula first, then value
+      var fileUrlFormula = fileUrlFormulas[i - 1] ? fileUrlFormulas[i - 1][0] : '';
+      var fileUrlValue = fileUrlValues[i - 1] ? fileUrlValues[i - 1][0] : '';
+      var fileUrl = extractUrlFromCell(fileUrlFormula || fileUrlValue);
+      
+      result.push({
+        rowIndex: i + 1, // Actual row number in sheet (1-indexed + header)
+        timestamp: formatTimestamp(data[i][0]),
+        noRegistrasi: data[i][1] || '',
+        nama: data[i][2] || '',
+        tglLahir: formatDate(data[i][3]),
+        nik: data[i][4] ? String(data[i][4]) : '',
+        profesi: data[i][5] || '',
+        email: data[i][6] || '',
+        satuSehat: data[i][7] || '',
+        alamat: data[i][8] || '',
+        provinsi: data[i][9] || '',
+        fileName: data[i][10] || '',
+        fileUrl: fileUrl
+      });
+    }
+    
+    return { status: 'success', data: result };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+// =====================================================
+// Update data for Admin Dashboard
+// =====================================================
+function updateData(params) {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      return { status: 'error', message: 'Sheet not found' };
+    }
+    
+    var rowIndex = parseInt(params.rowIndex);
+    
+    // Update specific columns (not timestamp, noRegistrasi, NIK, file columns)
+    // Headers: Timestamp, No. Registrasi, Nama, TglLahir, NIK, Profesi, Email, SatuSehat, Alamat, Provinsi, FileName, FileUrl
+    sheet.getRange(rowIndex, 3).setValue(params.nama);      // Column C - Nama
+    sheet.getRange(rowIndex, 4).setValue(params.tglLahir);  // Column D - TglLahir
+    sheet.getRange(rowIndex, 6).setValue(params.profesi);   // Column F - Profesi
+    sheet.getRange(rowIndex, 7).setValue(params.email);     // Column G - Email
+    sheet.getRange(rowIndex, 8).setValue(params.satuSehat); // Column H - SatuSehat
+    sheet.getRange(rowIndex, 9).setValue(params.alamat);    // Column I - Alamat
+    sheet.getRange(rowIndex, 10).setValue(params.provinsi); // Column J - Provinsi
+    
+    return { status: 'success', message: 'Data updated successfully' };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+// =====================================================
+// Delete data for Admin Dashboard (by NIK - more reliable)
+// =====================================================
+function deleteData(rowIndex, nik) {
+  try {
+    Logger.log('Delete requested - rowIndex: ' + rowIndex + ', nik: ' + nik);
+    
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      return { status: 'error', message: 'Sheet not found' };
+    }
+    
+    var lastRow = sheet.getLastRow();
+    var actualRowIndex = null;
+    
+    // Jika NIK diberikan, cari row berdasarkan NIK (lebih akurat)
+    if (nik && nik.trim() !== '') {
+      var data = sheet.getDataRange().getValues();
+      var nikCol = 4; // Kolom E (index 4) adalah NIK
+      
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][nikCol]).trim() === String(nik).trim()) {
+          actualRowIndex = i + 1; // +1 karena array 0-indexed, sheet 1-indexed
+          Logger.log('Found NIK at row: ' + actualRowIndex);
+          break;
+        }
+      }
+      
+      if (!actualRowIndex) {
+        return { status: 'error', message: 'Data dengan NIK ' + nik + ' tidak ditemukan' };
+      }
+    } else if (rowIndex && rowIndex > 1) {
+      // Fallback ke rowIndex jika NIK tidak ada
+      actualRowIndex = parseInt(rowIndex);
+    } else {
+      return { status: 'error', message: 'Invalid identifier - rowIndex: ' + rowIndex + ', nik: ' + nik };
+    }
+    
+    // Validasi row index
+    if (actualRowIndex <= 1 || actualRowIndex > lastRow) {
+      return { status: 'error', message: 'Row index out of range: ' + actualRowIndex };
+    }
+    
+    Logger.log('Deleting row ' + actualRowIndex + ' from sheet with ' + lastRow + ' rows');
+    
+    // Get file URL before deleting to also delete from Drive
+    var fileUrlFormula = sheet.getRange(actualRowIndex, 12).getFormula();
+    var fileUrlValue = sheet.getRange(actualRowIndex, 12).getValue();
+    var fileUrl = extractUrlFromCell(fileUrlFormula || fileUrlValue);
+    
+    // Delete the row
+    sheet.deleteRow(actualRowIndex);
+    Logger.log('Row deleted successfully');
+    
+    // Optionally delete file from Drive
+    if (fileUrl) {
+      try {
+        var fileId = extractFileIdFromUrl(fileUrl);
+        if (fileId) {
+          DriveApp.getFileById(fileId).setTrashed(true);
+          Logger.log('File trashed: ' + fileId);
+        }
+      } catch (e) {
+        // File deletion failed, but row is deleted
+        Logger.log('Could not delete file: ' + e.toString());
+      }
+    }
+    
+    return { status: 'success', message: 'Data deleted successfully' };
+  } catch (error) {
+    Logger.log('Delete error: ' + error.toString());
+    return { status: 'error', message: error.toString() };
+  }
+}
+
+// =====================================================
+// Helper: Format timestamp for display
+// =====================================================
+function formatTimestamp(date) {
+  if (!date) return '';
+  if (typeof date === 'string') return date;
+  try {
+    var d = new Date(date);
+    return Utilities.formatDate(d, 'Asia/Jakarta', 'dd/MM/yyyy HH:mm');
+  } catch (e) {
+    return String(date);
+  }
+}
+
+// =====================================================
+// Helper: Format date for display
+// =====================================================
+function formatDate(date) {
+  if (!date) return '';
+  if (typeof date === 'string') return date;
+  try {
+    var d = new Date(date);
+    return Utilities.formatDate(d, 'Asia/Jakarta', 'yyyy-MM-dd');
+  } catch (e) {
+    return String(date);
+  }
+}
+
+// =====================================================
+// Helper: Extract URL from cell (handles HYPERLINK formula)
+// =====================================================
+function extractUrlFromCell(cellValue) {
+  if (!cellValue) return '';
+  var str = String(cellValue);
+  
+  // If it's a HYPERLINK formula like =HYPERLINK("url", "text")
+  var match = str.match(/HYPERLINK\s*\(\s*["']([^"']+)["']/i);
+  if (match) return match[1];
+  
+  // Try another pattern for HYPERLINK
+  var match2 = str.match(/=HYPERLINK\("([^"]+)"/i);
+  if (match2) return match2[1];
+  
+  // If it contains a Google Drive URL, extract it
+  var driveMatch = str.match(/(https:\/\/drive\.google\.com\/[^\s"',]+)/i);
+  if (driveMatch) return driveMatch[1];
+  
+  // If it starts with http, return as is
+  if (str.startsWith('http')) return str;
+  
+  // Check if it's just a file ID (no http), construct the Drive URL
+  if (str.match(/^[a-zA-Z0-9_-]{20,}$/)) {
+    return 'https://drive.google.com/file/d/' + str + '/view';
+  }
+  
+  return str;
+}
+
+// =====================================================
+// Helper: Extract file ID from Google Drive URL
+// =====================================================
+function extractFileIdFromUrl(url) {
+  if (!url) return null;
+  
+  // Handle various Google Drive URL formats
+  var patterns = [
+    /\/d\/([a-zA-Z0-9_-]+)/,
+    /id=([a-zA-Z0-9_-]+)/,
+    /\/file\/d\/([a-zA-Z0-9_-]+)/
+  ];
+  
+  for (var i = 0; i < patterns.length; i++) {
+    var match = url.match(patterns[i]);
+    if (match) return match[1];
+  }
+  
+  return null;
 }
