@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrasi Webinar Modern</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS v4 -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Google Fonts -->
@@ -27,16 +27,32 @@
                     colors: {
                         primary: '#2563EB',
                         secondary: '#1E40AF',
+                        accent: '#06b6d4',
                     },
                     animation: {
                         'slide-up': 'slideUp 0.8s ease-out',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                        'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
                     },
                     keyframes: {
                         slideUp: {
                             '0%': { transform: 'translateY(20px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        bounceSoft: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(37, 99, 235, 0.3)',
+                        'glow-lg': '0 0 40px rgba(37, 99, 235, 0.5)',
+                        'neon': '0 0 15px rgba(6, 182, 212, 0.4)',
                     }
                 }
             }
@@ -44,6 +60,50 @@
     </script>
 
     <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 25%, #3b82f6 50%, #06b6d4 75%, #059669 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.15);
+            border-color: rgba(37, 99, 235, 0.3);
+        }
+        
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -52,37 +112,40 @@
             background: #f1f1f1; 
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
+            background: linear-gradient(135deg, #2563EB, #06b6d4);
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+            background: linear-gradient(135deg, #1e40af, #0891b2);
         }
 
-        /* Input Focus Effect */
+        /* Input Focus Effect - Enhanced */
         .input-group:focus-within i {
             color: #2563EB;
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(10deg);
         }
         
         /* Smooth Transition */
         input, select, textarea, div, span, p, h1, h3, h4, button {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Language Switch Active State */
+        /* Language Switch Active State - Enhanced */
         .lang-active {
-            background-color: white;
-            color: #1e3a8a; /* blue-900 */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            color: #1e3a8a;
+            box-shadow: 0 8px 16px -2px rgba(37, 99, 235, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             font-weight: 700;
+            transform: translateY(-2px);
         }
         .lang-inactive {
-            background-color: transparent;
-            color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
         }
         .lang-inactive:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
         }
         /* Toast / Upload Progress */
         #toast {
@@ -92,25 +155,65 @@
             z-index: 60;
             display: none;
             min-width: 220px;
+            animation: toastSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         #toast.show {
             display: block;
-            animation: toastIn 0.22s ease-out;
         }
-        @keyframes toastIn {
-            from { transform: translateY(8px); opacity: 0 }
-            to { transform: translateY(0); opacity: 1 }
+        @keyframes toastSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateX(400px) scale(0.8);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
         }
-        #toast .toast-inner { padding: 0.65rem 0.85rem; border-radius: 0.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+        #toast .toast-inner { 
+            padding: 0.65rem 0.85rem; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
         #upload-progress-bar { height: 6px; border-radius: 6px; overflow: hidden; }
         #upload-progress-inner { height: 100%; width: 0%; transition: width 0.2s linear; }
         /* Modal */
         #confirmationModal { display: none; position: fixed; inset: 0; z-index: 70; align-items: center; justify-content: center; }
         #confirmationModal.show { display: flex; }
-        #confirmationModal .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
-        #confirmationModal .modal-card { position: relative; width: 100%; max-width: 720px; margin: 24px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.25); }
+        #confirmationModal .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        #confirmationModal .modal-card { position: relative; width: 100%; max-width: 720px; margin: 24px; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
         #confirmationModal .modal-body { padding: 1.25rem; }
-        #confirmationModal img.preview { max-width: 160px; max-height: 120px; object-fit: cover; border-radius: 8px; }
+        #confirmationModal img.preview { max-width: 160px; max-height: 120px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        /* Countdown animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+        /* Shimmer animation for QR codes */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .animate-shimmer {
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite linear;
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen relative overflow-x-hidden font-sans">
@@ -130,10 +233,12 @@
             <!-- Language Switcher (Top Right) -->
             <div class="absolute top-5 right-5 z-30 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-1 flex shadow-lg">
                 <button type="button" onclick="setLanguage('id')" id="btn-id" class="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all lang-active">
-                    <span class="text-base">🇮🇩</span> ID
+                    <img src="https://flagcdn.com/w20/id.png" srcset="https://flagcdn.com/w40/id.png 2x" width="20" height="15" alt="Indonesia" class="rounded-sm">
+                    <span>ID</span>
                 </button>
                 <button type="button" onclick="setLanguage('en')" id="btn-en" class="px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all lang-inactive">
-                    <span class="text-base">🇬🇧</span> EN
+                    <img src="https://flagcdn.com/w20/gb.png" srcset="https://flagcdn.com/w40/gb.png 2x" width="20" height="15" alt="English" class="rounded-sm">
+                    <span>EN</span>
                 </button>
             </div>
 
@@ -154,6 +259,70 @@
 
                     <p class="text-blue-100 text-sm md:text-lg font-light mb-4 max-w-2xl mx-auto" data-i18n="headerSubtitle">"Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy Pada Perawatan Luka"</p>
 
+                    <!-- QR Code Validasi SIAKPEL & Link Pendaftaran -->
+                    <div class="flex flex-wrap justify-center gap-4 mb-6">
+                        <!-- QR Code SIAKPEL -->
+                        <a href="https://siakpel.kemkes.go.id/index.php/Portal/kegiatan/39353034-3632-4037-b139-323132303932" target="_blank" class="group">
+                            <div class="bg-white/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border-2 border-white/50 hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+                                <div class="flex items-center gap-3">
+                                    <!-- QR Code -->
+                                    <div class="bg-white p-2 rounded-xl shadow-inner">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://siakpel.kemkes.go.id/index.php/Portal/kegiatan/39353034-3632-4037-b139-323132303932&bgcolor=ffffff&color=1e40af" 
+                                             alt="QR Code SIAKPEL" 
+                                             class="w-20 h-20 rounded-lg">
+                                    </div>
+                                    <!-- Info -->
+                                    <div class="text-left pr-2">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <i class="fas fa-certificate text-green-500 text-sm"></i>
+                                            <span class="text-xs font-bold text-green-600 uppercase tracking-wide" data-i18n="qrVerified">Terverifikasi</span>
+                                        </div>
+                                        <p class="text-gray-800 text-xs font-semibold leading-tight" data-i18n="qrSiakpel">Terdaftar di SIAKPEL</p>
+                                        <p class="text-gray-500 text-[10px]" data-i18n="qrKemenkes">Kementerian Kesehatan RI</p>
+                                        <div class="flex items-center gap-1 mt-1.5 text-blue-600 group-hover:text-blue-700">
+                                            <span class="text-[10px] font-medium" data-i18n="qrScanMe">Scan untuk validasi</span>
+                                            <i class="fas fa-external-link-alt text-[8px]"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- QR Code Link Pendaftaran -->
+                        <a href="https://webinarmedis.fwh.is/registrasi.html?i=1" target="_blank" class="group">
+                            <div class="bg-gradient-to-br from-purple-500/95 to-indigo-600/95 backdrop-blur-sm rounded-2xl p-3 shadow-xl border-2 border-white/50 hover:scale-105 transition-all duration-300 hover:shadow-2xl relative overflow-hidden">
+                                <!-- Animated background -->
+                                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-shimmer"></div>
+                                <div class="flex items-center gap-3 relative z-10">
+                                    <!-- QR Code -->
+                                    <div class="bg-white p-2 rounded-xl shadow-inner relative">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://webinarmedis.fwh.is/registrasi.html?i=1&bgcolor=ffffff&color=7c3aed" 
+                                             alt="QR Code Pendaftaran" 
+                                             class="w-20 h-20 rounded-lg">
+                                        <!-- Animated corner icon -->
+                                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                            <i class="fas fa-link text-yellow-800 text-[8px]"></i>
+                                        </div>
+                                    </div>
+                                    <!-- Info -->
+                                    <div class="text-left pr-2">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <i class="fas fa-qrcode text-yellow-300 text-sm animate-pulse"></i>
+                                            <span class="text-xs font-bold text-yellow-300 uppercase tracking-wide" data-i18n="qrRegister">Daftar Sekarang</span>
+                                        </div>
+                                        <p class="text-white text-xs font-semibold leading-tight" data-i18n="qrRegisterLink">Link Pendaftaran Webinar</p>
+                                        <p class="text-purple-200 text-[10px]" data-i18n="qrRegisterDesc">Scan atau klik untuk daftar</p>
+                                        <div class="flex items-center gap-1 mt-1.5 text-yellow-300 group-hover:text-yellow-200">
+                                            <i class="fas fa-hand-pointer text-[10px] animate-bounce"></i>
+                                            <span class="text-[10px] font-medium" data-i18n="qrClickHere">Klik di sini</span>
+                                            <i class="fas fa-arrow-right text-[8px] animate-pulse"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
                     <!-- Weather, Date, Time Bar -->
                     <div id="weather-bar" class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full text-white text-sm font-medium border border-white/20 shadow-sm mb-8 animate-pulse-slow">
                         <span id="weather-icon" class="flex items-center justify-center text-2xl animate-spin-slow"><i class="fas fa-cloud-sun"></i></span>
@@ -163,15 +332,134 @@
                         <span class="hidden md:inline">|</span>
                         <span id="jam-detik" class="font-mono tracking-widest"></span>
                     </div>
-                    <!-- Kuota & HTM Bar -->
+                    <!-- Kuota & Biaya Pendaftaran Bar -->
                     <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-6 bg-gradient-to-r from-green-400/80 to-blue-500/80 px-5 py-2.5 rounded-full text-white text-base font-semibold border border-white/20 shadow-lg mb-8 animate-pulse-slow">
-                        <span class="flex items-center gap-2"><i class="fas fa-users text-yellow-200 animate-bounce"></i> Kuota <span class="font-bold">500</span> Peserta</span>
+                        <span class="flex items-center gap-2"><i class="fas fa-users text-yellow-200 animate-bounce"></i> <span data-i18n="kuotaText">Kuota</span> <span class="font-bold">500</span> <span data-i18n="kuotaPeserta">Peserta</span></span>
                         <span class="hidden md:inline">|</span>
-                        <span class="flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-200 animate-pulse"></i> HTM: <span class="font-bold">Rp. 50.000</span></span>
+                        <span class="flex items-center gap-2"><i class="fas fa-money-bill-wave text-green-200 animate-pulse"></i> <span data-i18n="htmText">Biaya Pendaftaran:</span> <span class="font-bold">Rp. 50.000</span></span>
                     </div>
-                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-5 py-2.5 rounded-full text-white text-sm font-medium border border-white/20 shadow-sm hover:bg-white/30 transition-all cursor-default mb-8">
-                        <i class="far fa-calendar-check text-yellow-300"></i>
-                        <span data-i18n="eventDate">Sabtu, 10 Januari 2026</span>
+                    <!-- Event Date & Countdown Section -->
+                    <div id="dateCountdownContainer" class="mb-8">
+                        <!-- Countdown Display - Always Visible -->
+                        <div id="countdownDisplay" class="bg-gradient-to-r from-purple-600/90 via-pink-500/90 to-orange-500/90 backdrop-blur-md px-6 py-5 rounded-2xl text-white border border-white/20 shadow-2xl mb-4">
+                            <div class="flex items-center justify-center gap-2 mb-3">
+                                <i class="fas fa-fire text-yellow-300 text-xl animate-pulse"></i>
+                                <span class="text-sm font-semibold uppercase tracking-wider" data-i18n="countdownLabel">Menuju Acara</span>
+                                <i class="fas fa-fire text-yellow-300 text-xl animate-pulse"></i>
+                            </div>
+                            <div class="flex items-center justify-center gap-3 md:gap-5">
+                                <!-- Days -->
+                                <div class="text-center bg-white/20 rounded-xl px-4 py-3 min-w-[70px] hover:scale-110 transition-transform duration-300">
+                                    <div class="relative">
+                                        <span id="countdownDays" class="font-bold text-3xl md:text-4xl block text-yellow-200 drop-shadow-lg">00</span>
+                                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                                    </div>
+                                    <span class="text-xs block opacity-90 mt-1 font-medium" data-i18n="countdownDays">Hari</span>
+                                </div>
+                                <span class="text-yellow-300 font-bold text-3xl animate-pulse">:</span>
+                                <!-- Hours -->
+                                <div class="text-center bg-white/20 rounded-xl px-4 py-3 min-w-[70px] hover:scale-110 transition-transform duration-300">
+                                    <span id="countdownHours" class="font-bold text-3xl md:text-4xl block text-cyan-200 drop-shadow-lg">00</span>
+                                    <span class="text-xs block opacity-90 mt-1 font-medium" data-i18n="countdownHours">Jam</span>
+                                </div>
+                                <span class="text-yellow-300 font-bold text-3xl animate-pulse">:</span>
+                                <!-- Minutes -->
+                                <div class="text-center bg-white/20 rounded-xl px-4 py-3 min-w-[70px] hover:scale-110 transition-transform duration-300">
+                                    <span id="countdownMinutes" class="font-bold text-3xl md:text-4xl block text-green-200 drop-shadow-lg">00</span>
+                                    <span class="text-xs block opacity-90 mt-1 font-medium" data-i18n="countdownMinutes">Menit</span>
+                                </div>
+                                <span class="text-yellow-300 font-bold text-3xl animate-pulse">:</span>
+                                <!-- Seconds -->
+                                <div class="text-center bg-white/20 rounded-xl px-4 py-3 min-w-[70px] hover:scale-110 transition-transform duration-300 relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-red-500/30 to-transparent animate-pulse"></div>
+                                    <span id="countdownSeconds" class="font-bold text-3xl md:text-4xl block text-red-200 drop-shadow-lg relative z-10">00</span>
+                                    <span class="text-xs block opacity-90 mt-1 font-medium relative z-10" data-i18n="countdownSeconds">Detik</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Event Date Display - Below Countdown -->
+                        <div id="eventDateDisplay" class="inline-flex items-center gap-3 bg-white/25 backdrop-blur-md px-6 py-3 rounded-full text-white font-semibold border border-white/30 shadow-lg hover:bg-white/35 transition-all cursor-default group">
+                            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg group-hover:animate-spin" style="animation-duration: 2s;">
+                                <i class="far fa-calendar-alt text-yellow-800 text-lg"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="text-[10px] uppercase tracking-wider opacity-80 block" data-i18n="eventDateLabel">Tanggal & Waktu Pelaksanaan</span>
+                                <span class="text-lg md:text-xl font-bold" data-i18n="eventDate">Sabtu, 10 Januari 2026</span>
+                                <span class="text-sm opacity-90 flex items-center gap-1 mt-0.5">
+                                    <i class="fas fa-clock text-yellow-300 text-xs"></i>
+                                    <span data-i18n="eventTime">08:00 WIB s/d Selesai</span>
+                                </span>
+                            </div>
+                            <i class="fas fa-star text-yellow-300 animate-spin" style="animation-duration: 3s;"></i>
+                        </div>
+                    </div>
+
+                    <!-- Event Location / Venue Section -->
+                    <div class="mb-8">
+                        <div class="bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-purple-600/90 backdrop-blur-md px-6 py-5 rounded-2xl text-white border border-white/20 shadow-2xl">
+                            <!-- Header -->
+                            <div class="flex items-center justify-center gap-3 mb-4">
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center animate-bounce">
+                                    <i class="fas fa-video text-cyan-300 text-xl"></i>
+                                </div>
+                                <div class="text-center">
+                                    <span class="text-[10px] uppercase tracking-wider opacity-80 block" data-i18n="venueLabel">Tempat Pelaksanaan</span>
+                                    <span class="text-xl md:text-2xl font-bold flex items-center gap-2">
+                                        <span data-i18n="venueOnline">Daring via</span>
+                                        <span class="bg-blue-500 px-3 py-1 rounded-lg flex items-center gap-2 shadow-lg">
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M4.5 4.5h15v15h-15z" fill="#2D8CFF"/>
+                                                <path d="M12 6.75c-2.9 0-5.25 2.35-5.25 5.25s2.35 5.25 5.25 5.25 5.25-2.35 5.25-5.25-2.35-5.25-5.25-5.25zm2.47 7.72l-3.22-2.03v-3.19h1.5v2.44l2.47 1.56-.75 1.22z" fill="white"/>
+                                            </svg>
+                                            ZOOM
+                                        </span>
+                                    </span>
+                                </div>
+                                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-globe text-green-300 text-xl animate-spin" style="animation-duration: 4s;"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Info Box -->
+                            <div class="bg-white/15 rounded-xl p-4 border border-white/20">
+                                <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+                                    <!-- Zoom Link Info -->
+                                    <div class="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full">
+                                        <i class="fas fa-link text-yellow-300 animate-pulse"></i>
+                                        <span class="text-sm" data-i18n="zoomLinkInfo">Link Zoom akan diinfokan via</span>
+                                    </div>
+                                    
+                                    <!-- WhatsApp Group -->
+                                    <div class="flex items-center gap-2 bg-green-500 px-4 py-2 rounded-full shadow-lg">
+                                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center animate-bounce">
+                                            <i class="fab fa-whatsapp text-green-500 text-lg"></i>
+                                        </div>
+                                        <span class="font-semibold" data-i18n="zoomWaGroup">Grup WhatsApp</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Additional Info -->
+                                <div class="mt-3 flex flex-wrap items-center justify-center gap-3 text-xs opacity-80">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-users text-cyan-300"></i>
+                                        <span data-i18n="zoomCapacity">Kapasitas: 500 Peserta</span>
+                                    </span>
+                                    <span class="hidden md:inline">•</span>
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-certificate text-pink-300 animate-pulse"></i>
+                                        <span data-i18n="zoomCertificate">E-Sertifikat</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Decorative Elements -->
+                            <div class="flex justify-center mt-3 gap-2">
+                                <span class="w-2 h-2 bg-cyan-400 rounded-full animate-ping"></span>
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-ping" style="animation-delay: 0.2s;"></span>
+                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-ping" style="animation-delay: 0.4s;"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Speaker Section -->
@@ -179,7 +467,7 @@
                         <!-- Speaker 1 -->
                         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Mohamad+Masykurin&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <img src="https://storage.unitedwebnetwork.com/files/486/934771-26078-Dr%20Mohamad%20Masykurin%20Mafauzy_268830.png" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm object-cover">
                                 <div>
                                     <h4 class="text-white text-xs font-bold leading-tight">Dr. Mohamad Masykurin</h4>
                                     <p class="text-blue-200 text-[10px]">Bin Mafauzy</p>
@@ -193,7 +481,7 @@
                         <!-- Speaker 2 -->
                         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Wan+Syahmi&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <img src="https://experts.usm.my/staff/ODgxMTEwMDM1MTk1.jpg" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm object-cover">
                                 <div>
                                     <h4 class="text-white text-xs font-bold leading-tight">Dr. Wan Syahmi</h4>
                                     <p class="text-blue-200 text-[10px]">Bin Wan Mohamad</p>
@@ -207,7 +495,7 @@
                         <!-- Speaker 3 -->
                         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Asrizal&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <img src="https://i.ibb.co.com/rf2PMJby/Picture2.png" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm object-cover object-top" style="object-position: center 20%;">
                                 <div>
                                     <h4 class="text-white text-xs font-bold leading-tight">Ns. Asrizal, M.Kep.</h4>
                                     <p class="text-blue-200 text-[10px]">Ph.D., WOC(ET)N</p>
@@ -221,7 +509,7 @@
                         <!-- Speaker 4 -->
                         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 group">
                             <div class="flex items-center gap-3 mb-3">
-                                <img src="https://ui-avatars.com/api/?name=Zubaidi&background=random&color=fff" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm">
+                                <img src="https://i.ibb.co.com/8D3gycwV/Picture1.png" alt="Speaker" class="w-10 h-10 rounded-full border-2 border-white/50 shadow-sm object-cover object-top" style="object-position: center 20%;">
                                 <div>
                                     <h4 class="text-white text-xs font-bold leading-tight">Ns. Zubaidi, S.Kep.</h4>
                                     <p class="text-blue-200 text-[10px]">WOC(ET)N</p>
@@ -243,9 +531,9 @@
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-6">
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fas fa-shield-alt text-blue-600"></i>
-                            <h3 class="text-blue-800 text-sm font-bold uppercase tracking-wider">Verifikasi NIK Terlebih Dahulu</h3>
+                            <h3 class="text-blue-800 text-sm font-bold uppercase tracking-wider" data-i18n="nikVerifyTitle">Verifikasi NIK Terlebih Dahulu</h3>
                         </div>
-                        <p class="text-blue-600 text-xs mb-4">Masukkan NIK Anda untuk memastikan belum pernah mendaftar sebelumnya.</p>
+                        <p class="text-blue-600 text-xs mb-4" data-i18n="nikVerifyDesc">Masukkan NIK Anda untuk memastikan belum pernah mendaftar sebelumnya.</p>
                         
                         <div class="space-y-3">
                             <label for="nik" class="block text-sm font-semibold text-gray-700 ml-1"><span data-i18n="labelNik">NIK (KTP)</span> <span class="text-red-500">*</span></label>
@@ -253,11 +541,11 @@
                             <div class="input-group relative group">
                                 <input type="text" id="nik" maxlength="16" inputmode="numeric" pattern="[0-9]*" class="block w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-gray-800 placeholder-gray-400 text-center text-xl tracking-[0.3em] font-bold" placeholder="0000000000000000" data-placeholder-i18n="placeholderNik" required style="letter-spacing: 0.2em; font-family: 'Courier New', monospace;">
                             </div>
-                            <p class="text-center text-xs text-gray-500">Masukkan 16 digit NIK sesuai KTP</p>
+                            <p class="text-center text-xs text-gray-500" data-i18n="nikHint">Masukkan 16 digit NIK sesuai KTP</p>
                             <!-- Tombol Cek NIK di bawah -->
                             <button type="button" id="btnCheckNik" class="w-full px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i class="fas fa-search"></i>
-                                <span>Cek NIK</span>
+                                <span data-i18n="btnCheckNik">Cek NIK</span>
                             </button>
                             <!-- NIK Status Message -->
                             <div id="nikStatus" class="hidden mt-2 p-3 rounded-xl text-sm flex items-center gap-2"></div>
@@ -419,16 +707,16 @@
 
                     <!-- Section: Pembayaran -->
                     <div class="border-b border-gray-100 pb-2 mt-8 mb-4">
-                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Informasi Pembayaran</h3>
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-2" data-i18n="sectionPayment">Informasi Pembayaran</h3>
                     </div>
 
                     <!-- Info Rekening Pembayaran -->
                     <div class="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-2xl p-5 mb-4">
                         <div class="flex items-center gap-2 mb-3">
                             <i class="fas fa-credit-card text-orange-600"></i>
-                            <h4 class="text-orange-800 text-sm font-bold">Pembayaran dapat dilakukan</h4>
+                            <h4 class="text-orange-800 text-sm font-bold" data-i18n="paymentTitle">Pembayaran dapat dilakukan</h4>
                         </div>
-                        <p class="text-orange-700 text-sm mb-3">Melalui <strong>Cash / Transfer</strong></p>
+                        <p class="text-orange-700 text-sm mb-3" data-i18n="paymentMethod">Melalui <strong>Cash / Transfer</strong></p>
                         
                         <div class="bg-white rounded-xl p-4 border border-orange-100 shadow-sm">
                             <div class="flex items-center gap-3 mb-2">
@@ -437,7 +725,7 @@
                                 </div>
                                 <div>
                                     <p class="text-gray-800 font-bold text-lg tracking-wider">1117359109</p>
-                                    <p class="text-gray-600 text-sm">a.n. <strong>CV BINA KARYA GEMILANG</strong></p>
+                                    <p class="text-gray-600 text-sm" data-i18n="accountName">a.n. <strong>CV BINA KARYA GEMILANG</strong></p>
                                 </div>
                             </div>
                             <p class="text-gray-500 text-xs mt-2"><i class="fas fa-map-marker-alt mr-1"></i> KCP Lubuk Pakam</p>
@@ -445,7 +733,7 @@
                         
                         <div class="flex items-start gap-2 text-xs text-orange-600 mt-3">
                             <i class="fas fa-exclamation-circle mt-0.5"></i>
-                            <p>Pastikan transfer sesuai nominal HTM: <strong>Rp. 50.000</strong></p>
+                            <p data-i18n="paymentNote">Pastikan transfer sesuai nominal Biaya Pendaftaran: <strong>Rp. 50.000</strong></p>
                         </div>
                     </div>
 
@@ -465,11 +753,11 @@
                         </div>
                         <div class="flex items-start gap-2 text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
                             <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                            <p data-i18n="uploadNote">Upload bukti transfer Anda. Data akan tersimpan di sistem.</p>
+                               <p data-i18n="uploadNote">Upload bukti transfer Anda (upload gambar bentuk PNG/JPG/JPEG). Data akan tersimpan di sistem.</p>
                         </div>
                     </div>
 
-                    <div class="pt-6">
+                    <div class="pt-6 space-y-3">
                         <button type="submit" disabled class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none">
                             <!-- Shine Effect -->
                             <div class="absolute top-0 -inset-full h-full w-1/2 z-0 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 group-hover:animate-shine"></div>
@@ -483,7 +771,9 @@
                                 <span class="text-[10px] font-medium opacity-80 mt-1" data-i18n="btnSubtext">Kirim Data Pendaftaran</span>
                             </div>
                         </button>
-                        <p class="text-center text-gray-400 text-xs mt-4" data-i18n="footerNote">Data pendaftaran akan tersimpan di sistem.</p>
+                        
+                        <!-- Tombol New / Reset Form -->
+<p class="text-center text-gray-400 text-xs mt-4" data-i18n="footerNote">Data pendaftaran akan tersimpan di sistem.</p>
                     </div>
 
                     <!-- Toast / Upload Progress -->
@@ -509,10 +799,10 @@
                                 </div>
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="flex-1 text-center">
-                                        <h3 class="text-xl font-bold text-green-600 mb-2">🎉 Pendaftaran Berhasil!</h3>
-                                        <p class="text-sm text-gray-600 mb-1">Data Anda telah berhasil disimpan.</p>
-                                        <p class="text-sm text-gray-600 mb-4 font-semibold">Terima kasih sudah mendaftar! 🙏</p>
-                                        <p class="text-xs text-gray-500 mb-3">Berikut ringkasan pendaftaran Anda:</p>
+                                        <h3 class="text-xl font-bold text-green-600 mb-2" data-i18n="modalSuccessTitle">🎉 Pendaftaran Berhasil!</h3>
+                                        <p class="text-sm text-gray-600 mb-1" data-i18n="modalSuccessMsg">Data Anda telah berhasil disimpan.</p>
+                                        <p class="text-sm text-gray-600 mb-4 font-semibold" data-i18n="modalThankYou">Terima kasih sudah mendaftar! 🙏</p>
+                                        <p class="text-xs text-gray-500 mb-3" data-i18n="modalSummary">Berikut ringkasan pendaftaran Anda:</p>
                                         <div id="modalDetails" class="text-sm text-gray-700 mb-3 space-y-1"></div>
                                         <div class="flex items-center gap-3">
                                             <div id="modalImageWrapper" class="flex items-center gap-3"></div>
@@ -523,13 +813,13 @@
                                     </div>
                                 </div>
                                 <div class="mt-4 flex flex-col gap-3">
-                                    <p class="text-sm text-gray-600 text-center">📢 Bergabunglah ke grup WhatsApp untuk informasi lebih lanjut:</p>
+                                    <p class="text-sm text-gray-600 text-center" data-i18n="modalJoinWa">📢 Bergabunglah ke grup WhatsApp untuk informasi lebih lanjut:</p>
                                     <div class="flex gap-3 justify-center items-center flex-wrap">
                                         <a href="https://chat.whatsapp.com/FODB3RBr1zv9mgzERPG6On" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md inline-flex items-center gap-2">
-                                            <i class="fab fa-whatsapp"></i> Gabung Grup WhatsApp
+                                            <i class="fab fa-whatsapp"></i> <span data-i18n="modalBtnWa">Gabung Grup WhatsApp</span>
                                         </a>
-                                        <button id="modalDownloadBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Download Bukti Pendaftaran</button>
-                                        <button id="modalCloseBtn2" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Tutup</button>
+                                        <button id="modalDownloadBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md" data-i18n="modalBtnDownload">Download Bukti Pendaftaran</button>
+                                        <button id="modalCloseBtn2" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md" data-i18n="modalBtnClose">Tutup</button>
                                     </div>
                                 </div>
                             </div>
@@ -540,6 +830,59 @@
 
                 </form>
             </div>
+        </div>
+
+        <!-- Contact Person Section -->
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 mx-4 mb-6 shadow-lg">
+            <div class="text-center mb-4">
+                <h3 class="text-white text-lg font-bold flex items-center justify-center gap-2">
+                    <i class="fas fa-headset text-2xl animate-bounce"></i>
+                    <span data-i18n="contactHeading">Kontak Person</span>
+                </h3>
+                <p class="text-green-100 text-sm mt-1" data-i18n="contactSubtitle">Hubungi kami untuk informasi lebih lanjut</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3">
+                <!-- Admin 1 -->
+                <a href="https://wa.me/6281397020999" target="_blank" 
+                   class="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center group-hover:animate-pulse">
+                        <i class="fab fa-whatsapp text-green-500 text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/80 text-xs">Admin 1</p>
+                        <p class="text-white font-semibold">0813 9702 0999</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-white/60 text-xs group-hover:text-white transition-colors"></i>
+                </a>
+                <!-- Admin 2 -->
+                <a href="https://wa.me/6281331587426" target="_blank" 
+                   class="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center group-hover:animate-pulse">
+                        <i class="fab fa-whatsapp text-green-500 text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/80 text-xs">Admin 2</p>
+                        <p class="text-white font-semibold">0813 3158 7426</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-white/60 text-xs group-hover:text-white transition-colors"></i>
+                </a>
+                <!-- Admin 3 -->
+                <a href="https://wa.me/6281269679807" target="_blank" 
+                   class="group bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center group-hover:animate-pulse">
+                        <i class="fab fa-whatsapp text-green-500 text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-white/80 text-xs">Admin 3</p>
+                        <p class="text-white font-semibold">0812 6967 9807</p>
+                    </div>
+                    <i class="fas fa-external-link-alt text-white/60 text-xs group-hover:text-white transition-colors"></i>
+                </a>
+            </div>
+            <p class="text-center text-green-100 text-xs mt-4 flex items-center justify-center gap-2">
+                <i class="fas fa-clock"></i>
+                <span data-i18n="contactAvailability">Hubungi Pada Jam Kerja</span>
+            </p>
         </div>
 
         <!-- Footer -->
@@ -558,12 +901,26 @@
                 headerTitle: "Registrasi Webinar Medis",
                 headerSubtitle: "\"Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy Pada Perawatan Luka\"",
                 eventDate: "Sabtu, 10 Januari 2026",
+                eventDateLabel: "Tanggal & Waktu Pelaksanaan",
+                eventTime: "08:00 WIB s/d Selesai",
+                venueLabel: "Tempat Pelaksanaan",
+                venueOnline: "Daring via",
+                zoomLinkInfo: "Link Zoom akan diinfokan via",
+                zoomWaGroup: "Grup WhatsApp",
+                zoomTime: "08:00 WIB s/d Selesai",
+                zoomCapacity: "Kapasitas: 500 Peserta",
+                zoomCertificate: "E-Sertifikat",
+                nikVerifyTitle: "Verifikasi NIK Terlebih Dahulu",
+                nikVerifyDesc: "Masukkan NIK Anda untuk memastikan belum pernah mendaftar sebelumnya.",
+                nikHint: "Masukkan 16 digit NIK sesuai KTP",
+                btnCheckNik: "Cek NIK",
+                btnChangeNik: "Ganti NIK",
                 sectionPersonal: "Informasi Pribadi",
                 labelName: "Nama Lengkap & Gelar",
                 placeholderName: "Contoh: Ns. Budi Santoso, S.Kep",
                 labelDob: "Tanggal Lahir",
                 labelNik: "NIK (KTP)",
-                placeholderNik: "16 Digit NIK",
+                placeholderNik: "0000000000000000",
                 labelProfession: "Profesi",
                 optionSelectProf: "Pilih Profesi Anda...",
                 optionOther: "Lainnya",
@@ -576,24 +933,82 @@
                 placeholderAddress: "Nama Jalan, RT/RW, Kelurahan, Kecamatan",
                 labelProvince: "Provinsi",
                 optionSelectProv: "Pilih Provinsi Domisili...",
+                sectionPayment: "Informasi Pembayaran",
+                paymentTitle: "Pembayaran dapat dilakukan",
+                paymentMethod: "Melalui <strong>Cash / Transfer</strong>",
+                accountName: "a.n. <strong>CV BINA KARYA GEMILANG</strong>",
+                paymentNote: "Pastikan transfer sesuai nominal Biaya Pendaftaran: <strong>Rp. 50.000</strong>",
                 labelUpload: "Upload Bukti Pembayaran",
-                uploadNote: "Upload bukti transfer Anda. Data akan tersimpan di sistem.",
+                uploadNote: "Upload bukti transfer Anda (upload gambar format PNG/JPG/JPEG). Data akan tersimpan di sistem.",
                 btnSubmit: "DAFTAR SEKARANG",
                 btnSubtext: "Kirim Data Pendaftaran",
+                btnNew: "REGISTRASI BARU",
                 footerNote: "Data pendaftaran akan tersimpan di sistem.",
                 contactHeading: "Kontak Person",
-                copyright: "Panitia Webinar Kesehatan"
+                contactSubtitle: "Hubungi kami untuk informasi lebih lanjut",
+                contactAvailability: "Hubungi Pada Jam Kerja",
+                copyright: "Panitia Webinar Kesehatan",
+                // NIK status messages
+                nikAlreadyRegistered: "NIK sudah terdaftar! Anda tidak dapat mendaftar lagi dengan NIK ini.",
+                btnDownloadExisting: "Download Bukti Pendaftaran",
+                nikAvailable: "NIK belum terdaftar. Silakan lanjutkan mengisi formulir.",
+                nikChecking: "Sedang mengecek NIK...",
+                nikEnterFirst: "Silakan masukkan NIK terlebih dahulu",
+                nikMust16: "NIK harus 16 digit",
+                nikOnlyNumbers: "NIK hanya boleh berisi angka",
+                // Modal
+                modalSuccessTitle: "🎉 Pendaftaran Berhasil!",
+                modalSuccessMsg: "Data Anda telah berhasil disimpan.",
+                modalThankYou: "Terima kasih sudah mendaftar! 🙏",
+                modalSummary: "Berikut ringkasan pendaftaran Anda:",
+                modalJoinWa: "📢 Bergabunglah ke grup WhatsApp untuk informasi lebih lanjut:",
+                modalBtnWa: "Gabung Grup WhatsApp",
+                modalBtnDownload: "Download Bukti Pendaftaran",
+                modalBtnClose: "Tutup",
+                // Kuota
+                kuotaText: "Kuota",
+                kuotaPeserta: "Peserta",
+                htmText: "Biaya Pendaftaran:",
+                // QR Code SIAKPEL
+                qrVerified: "Terverifikasi",
+                qrSiakpel: "Terdaftar di SIAKPEL",
+                qrKemenkes: "Kementerian Kesehatan RI",
+                qrScanMe: "Scan untuk validasi",
+                // QR Code Pendaftaran
+                qrRegLink: "Link Pendaftaran Webinar",
+                qrRegScan: "Scan untuk daftar",
+                // Countdown
+                countdownDays: "Hari",
+                countdownHours: "Jam",
+                countdownMinutes: "Menit",
+                countdownSeconds: "Detik",
+                countdownLabel: "Menuju Acara",
+                countdownEnded: "Acara Berlangsung!"
             },
             en: {
                 headerTitle: "Medical Webinar Registration",
                 headerSubtitle: "\"Hyperbaric Oxygen Therapy (HBOT) & Ozone Therapy in Wound Care\"",
                 eventDate: "Saturday, January 10, 2026",
+                eventDateLabel: "Date & Time",
+                eventTime: "08:00 AM (GMT+7) until End",
+                venueLabel: "Event Venue",
+                venueOnline: "Online via",
+                zoomLinkInfo: "Zoom link will be shared via",
+                zoomWaGroup: "WhatsApp Group",
+                zoomTime: "08:00 AM (GMT+7) until End",
+                zoomCapacity: "Capacity: 500 Participants",
+                zoomCertificate: "E-Certificate",
+                nikVerifyTitle: "Verify Your NIK First",
+                nikVerifyDesc: "Enter your NIK to ensure you haven't registered before.",
+                nikHint: "Enter 16 digit NIK as per ID card",
+                btnCheckNik: "Check NIK",
+                btnChangeNik: "Change NIK",
                 sectionPersonal: "Personal Information",
                 labelName: "Full Name & Title",
                 placeholderName: "Example: Ns. John Doe, S.Kep",
                 labelDob: "Date of Birth",
                 labelNik: "National ID (NIK)",
-                placeholderNik: "16 Digit ID Number",
+                placeholderNik: "0000000000000000",
                 labelProfession: "Profession",
                 optionSelectProf: "Select Your Profession...",
                 optionOther: "Other",
@@ -606,22 +1021,77 @@
                 placeholderAddress: "Street Name, District, City",
                 labelProvince: "Province",
                 optionSelectProv: "Select Domicile Province...",
+                sectionPayment: "Payment Information",
+                paymentTitle: "Payment can be made",
+                paymentMethod: "Via <strong>Cash / Bank Transfer</strong>",
+                accountName: "Account: <strong>CV BINA KARYA GEMILANG</strong>",
+                paymentNote: "Please transfer exact amount: <strong>Rp. 50,000</strong>",
                 labelUpload: "Upload Payment Proof",
-                uploadNote: "Upload your payment proof. Data will be saved to the system.",
+                uploadNote: "Upload your payment proof (upload an image in PNG/JPG/JPEG format). Data will be saved to the system.",
                 btnSubmit: "REGISTER NOW",
                 btnSubtext: "Submit Registration Data",
+                btnNew: "NEW REGISTRATION",
                 footerNote: "Registration data will be saved to the system.",
                 contactHeading: "Contact Persons",
-                copyright: "Health Webinar Committee"
+                contactSubtitle: "Contact us for more information",
+                contactAvailability: "Contact During Working Hours",
+                copyright: "Health Webinar Committee",
+                // NIK status messages
+                nikAlreadyRegistered: "NIK already registered! You cannot register again with this NIK.",
+                btnDownloadExisting: "Download Registration Proof",
+                nikAvailable: "NIK is available. Please continue filling the form.",
+                nikChecking: "Checking NIK...",
+                nikEnterFirst: "Please enter your NIK first",
+                nikMust16: "NIK must be 16 digits",
+                nikOnlyNumbers: "NIK must contain only numbers",
+                // Modal
+                modalSuccessTitle: "🎉 Registration Successful!",
+                modalSuccessMsg: "Your data has been saved successfully.",
+                modalThankYou: "Thank you for registering! 🙏",
+                modalSummary: "Here is your registration summary:",
+                modalJoinWa: "📢 Join our WhatsApp group for more information:",
+                modalBtnWa: "Join WhatsApp Group",
+                modalBtnDownload: "Download Registration Proof",
+                modalBtnClose: "Close",
+                // Kuota
+                kuotaText: "Quota",
+                kuotaPeserta: "Participants",
+                htmText: "Fee:",
+                // QR Code SIAKPEL
+                qrVerified: "Verified",
+                qrSiakpel: "Registered on SIAKPEL",
+                qrKemenkes: "Ministry of Health RI",
+                qrScanMe: "Scan to validate",
+                // QR Code Registration
+                qrRegLink: "Webinar Registration Link",
+                qrRegScan: "Scan to register",
+                // Countdown
+                countdownDays: "Days",
+                countdownHours: "Hours",
+                countdownMinutes: "Minutes",
+                countdownSeconds: "Seconds",
+                countdownLabel: "Until Event",
+                countdownEnded: "Event is Live!"
             }
         };
 
+        // Current language
+        let currentLang = 'id';
+
         function setLanguage(lang) {
-            // Update Text Content
+            currentLang = lang;
+            
+            // Update Text Content (check if contains HTML)
             document.querySelectorAll('[data-i18n]').forEach(element => {
                 const key = element.getAttribute('data-i18n');
                 if (translations[lang][key]) {
-                    element.textContent = translations[lang][key];
+                    const text = translations[lang][key];
+                    // If text contains HTML tags, use innerHTML
+                    if (text.includes('<') && text.includes('>')) {
+                        element.innerHTML = text;
+                    } else {
+                        element.textContent = text;
+                    }
                 }
             });
 
@@ -648,6 +1118,11 @@
                 btnId.classList.remove('lang-active');
                 btnId.classList.add('lang-inactive');
             }
+        }
+        
+        // Helper function to get translation
+        function t(key) {
+            return translations[currentLang][key] || translations['id'][key] || key;
         }
 
         // --- EXISTING LOGIC ---
@@ -722,24 +1197,32 @@
         }
         
         // Show NIK status message
-        function showNikStatus(type, message) {
+        function showNikStatus(type, message, showDownload = false, nikValue = '') {
             const statusEl = document.getElementById('nikStatus');
             if (!statusEl) return;
             
             statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-yellow-100', 'text-yellow-700', 'bg-blue-100', 'text-blue-700');
             
+            let downloadBtn = '';
+            if (showDownload && nikValue) {
+                downloadBtn = '<button type="button" onclick="downloadExistingRegistration(\'' + nikValue + '\')" class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 hover:scale-[1.02]">' +
+                    '<i class="fas fa-download"></i>' +
+                    '<span data-i18n="btnDownloadExisting">' + t('btnDownloadExisting') + '</span>' +
+                '</button>';
+            }
+            
             if (type === 'success') {
                 statusEl.classList.add('bg-green-100', 'text-green-700');
-                statusEl.innerHTML = '<i class="fas fa-check-circle"></i><span>' + message + '</span>';
+                statusEl.innerHTML = '<div class="flex items-center gap-2"><i class="fas fa-check-circle"></i><span>' + message + '</span></div>' + downloadBtn;
             } else if (type === 'error') {
                 statusEl.classList.add('bg-red-100', 'text-red-700');
-                statusEl.innerHTML = '<i class="fas fa-times-circle"></i><span>' + message + '</span>';
+                statusEl.innerHTML = '<div class="flex items-center gap-2"><i class="fas fa-times-circle"></i><span>' + message + '</span></div>' + downloadBtn;
             } else if (type === 'warning') {
                 statusEl.classList.add('bg-yellow-100', 'text-yellow-700');
-                statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>' + message + '</span>';
+                statusEl.innerHTML = '<div class="flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i><span>' + message + '</span></div>' + downloadBtn;
             } else {
                 statusEl.classList.add('bg-blue-100', 'text-blue-700');
-                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + message + '</span>';
+                statusEl.innerHTML = '<div class="flex items-center gap-2"><i class="fas fa-spinner fa-spin"></i><span>' + message + '</span></div>' + downloadBtn;
             }
             statusEl.classList.remove('hidden');
         }
@@ -784,66 +1267,57 @@
             const nik = nikInput.value.trim();
             const btn = this;
             
-            // Jika sudah terverifikasi dan tombol jadi "Ganti NIK", reset dulu
+            // Jika sudah terverifikasi dan tombol jadi "Ganti NIK", reset seluruh form
             if (nikVerified) {
-                // Reset state - biarkan user edit NIK lagi
-                nikVerified = false;
-                nikInput.readOnly = false;
-                nikInput.value = '';
-                nikInput.focus();
-                nikInput.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
-                hideNikStatus();
-                disableFormFields();
-                // Kembalikan tombol ke "Cek NIK"
-                btn.innerHTML = '<i class="fas fa-search"></i><span>Cek NIK</span>';
-                btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
-                btn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                resetForm();
                 return;
             }
             
             // Validasi format NIK
             if (!nik) {
-                showNikStatus('warning', 'Silakan masukkan NIK terlebih dahulu');
+                showNikStatus('warning', t('nikEnterFirst'));
                 return;
             }
             
             if (nik.length !== 16) {
-                showNikStatus('warning', 'NIK harus 16 digit');
+                showNikStatus('warning', t('nikMust16'));
                 return;
             }
             
             if (!/^\d+$/.test(nik)) {
-                showNikStatus('warning', 'NIK hanya boleh berisi angka');
+                showNikStatus('warning', t('nikOnlyNumbers'));
                 return;
             }
             
             // Disable button saat proses
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Mengecek...</span>';
-            showNikStatus('info', 'Sedang mengecek NIK...');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>' + t('nikChecking') + '</span>';
+            showNikStatus('info', t('nikChecking'));
             
             try {
                 const result = await checkNikDuplicate(nik);
                 
                 if (result.success) {
                     if (result.exists) {
-                        // NIK sudah terdaftar
+                        // NIK sudah terdaftar - tampilkan tombol download dengan data
                         nikVerified = false;
-                        showNikStatus('error', 'NIK sudah terdaftar! Anda tidak dapat mendaftar lagi dengan NIK ini.');
+                        // Simpan data pendaftaran ke variable global untuk download
+                        window.existingRegistrationData = result.data || null;
+                        showNikStatus('error', t('nikAlreadyRegistered'), true, nik);
                         disableFormFields();
                         nikInput.classList.add('border-red-500', 'bg-red-50');
                         nikInput.classList.remove('border-green-500', 'bg-green-50');
                     } else {
                         // NIK belum terdaftar - OK
                         nikVerified = true;
-                        showNikStatus('success', 'NIK belum terdaftar. Silakan lanjutkan mengisi formulir.');
+                        showNikStatus('success', t('nikAvailable'));
                         enableFormFields();
                         nikInput.classList.add('border-green-500', 'bg-green-50');
                         nikInput.classList.remove('border-red-500', 'bg-red-50');
                         // Lock NIK input
                         nikInput.readOnly = true;
                         // Change button to "Ganti NIK"
-                        btn.innerHTML = '<i class="fas fa-edit"></i><span>Ganti NIK</span>';
+                        btn.innerHTML = '<i class="fas fa-edit"></i><span>' + t('btnChangeNik') + '</span>';
                         btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                         btn.classList.add('bg-gray-500', 'hover:bg-gray-600');
                     }
@@ -858,7 +1332,7 @@
             // Re-enable button
             btn.disabled = false;
             if (!nikVerified) {
-                btn.innerHTML = '<i class="fas fa-search"></i><span>Cek NIK</span>';
+                btn.innerHTML = '<i class="fas fa-search"></i><span>' + t('btnCheckNik') + '</span>';
                 btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
                 btn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
             }
@@ -1207,6 +1681,71 @@
             toast.classList.remove('show');
             toast.classList.add('hidden');
         }
+        
+        // Reset Form Function - Untuk registrasi baru
+        function resetForm() {
+            // Reset form ke state awal
+            form.reset();
+            
+            // Reset NIK verification state
+            nikVerified = false;
+            previousNik = '';
+            
+            // Reset NIK input ke editable
+            const nikInput = document.getElementById('nik');
+            if (nikInput) {
+                nikInput.readOnly = false;
+                nikInput.value = '';
+                nikInput.classList.remove('border-green-500', 'bg-green-50', 'border-red-500', 'bg-red-50');
+            }
+            
+            // Reset NIK status UI
+            const nikStatus = document.getElementById('nikStatus');
+            if (nikStatus) {
+                nikStatus.classList.add('hidden');
+                nikStatus.innerHTML = '';
+            }
+            
+            // Reset tombol "Cek NIK" ke state awal
+            const btnCheckNik = document.getElementById('btnCheckNik');
+            if (btnCheckNik) {
+                btnCheckNik.innerHTML = '<i class="fas fa-search"></i><span>' + t('btnCheckNik') + '</span>';
+                btnCheckNik.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                btnCheckNik.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+            }
+            
+            // Reset submit button ke disabled
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+            }
+            
+            // Disable form fields
+            disableFormFields();
+            
+            // Reset file preview jika ada
+            const preview = document.getElementById('preview');
+            const filePreview = document.getElementById('filePreview');
+            const noFileText = document.getElementById('noFileText');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const fileSizeDisplay = document.getElementById('fileSizeDisplay');
+            
+            if (preview) preview.src = '';
+            if (filePreview) filePreview.classList.add('hidden');
+            if (noFileText) noFileText.classList.remove('hidden');
+            if (fileNameDisplay) fileNameDisplay.textContent = '';
+            if (fileSizeDisplay) fileSizeDisplay.textContent = '';
+            
+            // Clear file input
+            const fileInput = document.getElementById('buktiTransfer');
+            if (fileInput) fileInput.value = '';
+            
+            // Focus ke NIK field
+            if (nikInput) nikInput.focus();
+            
+            // Tampilkan toast konfirmasi
+            showToast('Form sudah direset. Silakan isi NIK baru.', 'info', 3000);
+        }
 
         // Upload Progress helpers
         function showUploadProgress(percent) {
@@ -1240,6 +1779,38 @@
                 return;
             }
 
+            // VALIDASI WAJIB: Bukti Pembayaran
+            const buktiEl = document.getElementById('buktiBayar');
+            const buktiFile = buktiEl && buktiEl.files && buktiEl.files[0] ? buktiEl.files[0] : null;
+            
+            if (!buktiFile) {
+                showToast('⚠️ Bukti pembayaran WAJIB diupload!', 'error', 5000);
+                buktiEl.focus();
+                // Highlight upload area
+                const uploadArea = document.querySelector('.border-dashed');
+                if (uploadArea) {
+                    uploadArea.classList.add('border-red-500', 'bg-red-50');
+                    setTimeout(() => {
+                        uploadArea.classList.remove('border-red-500', 'bg-red-50');
+                    }, 3000);
+                }
+                return;
+            }
+
+            // Validasi format file (hanya PNG/JPG/JPEG)
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(buktiFile.type.toLowerCase())) {
+                showToast('⚠️ Format file tidak valid! Gunakan PNG, JPG, atau JPEG', 'error', 5000);
+                return;
+            }
+
+            // Validasi ukuran file (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (buktiFile.size > maxSize) {
+                showToast('⚠️ Ukuran file terlalu besar! Maksimal 5MB', 'error', 5000);
+                return;
+            }
+
             const nama = document.getElementById('nama').value;
             const tglLahir = document.getElementById('tgl_lahir').value;
             const nik = document.getElementById('nik').value;
@@ -1260,29 +1831,57 @@
             // show processing toast (indefinite)
             showToast('Sedang memproses...', 'info', 0);
 
-            // Upload file ke Google Drive
-            const buktiEl = document.getElementById('buktiBayar');
-            const buktiFile = buktiEl && buktiEl.files && buktiEl.files[0] ? buktiEl.files[0] : null;
+            // Upload file ke Google Drive - WAJIB BERHASIL
             let fileUrl = null;
+            let uploadSuccess = false;
             
-            if (buktiFile && googleScriptUrl) {
+            if (googleScriptUrl) {
                 try {
                     showToast('Mengunggah bukti ke Google Drive...', 'info', 0);
                     fileUrl = await uploadFileToDriveViaForm(buktiFile);
                     console.log('File uploaded, URL:', fileUrl);
-                    if (fileUrl) {
+                    if (fileUrl && fileUrl.startsWith('http')) {
                         showToast('✅ Bukti berhasil diunggah ke Drive!', 'success', 3000);
+                        uploadSuccess = true;
                     } else {
-                        showToast('⚠️ Gagal upload file, data tetap tersimpan', 'warning', 3000);
+                        throw new Error('Upload gagal - URL tidak valid');
                     }
                 } catch (err) {
                     console.error('Upload error:', err);
-                    showToast('⚠️ Gagal upload file, data tetap tersimpan', 'warning', 3000);
+                    showToast('❌ Gagal upload bukti pembayaran! Silakan coba lagi.', 'error', 5000);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        if (submitBtnOrig !== null) submitBtn.innerHTML = submitBtnOrig;
+                    }
+                    hideUploadProgress();
+                    return; // Stop submission if upload fails
                 }
+            } else {
+                showToast('❌ Konfigurasi server tidak valid!', 'error', 5000);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (submitBtnOrig !== null) submitBtn.innerHTML = submitBtnOrig;
+                }
+                return;
             }
+
+            // Double check upload berhasil
+            if (!uploadSuccess || !fileUrl) {
+                showToast('❌ Bukti pembayaran gagal diupload! Silakan coba lagi.', 'error', 5000);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (submitBtnOrig !== null) submitBtn.innerHTML = submitBtnOrig;
+                }
+                return;
+            }
+
+            // Generate Registration Number (same format as PDF)
+            const registrationTimestamp = Date.now();
+            const noRegistrasi = 'REG-' + nik.slice(-6) + '-' + registrationTimestamp.toString().slice(-4);
 
             // Save to Google Sheets
             const sheetPayload = {
+                noRegistrasi: noRegistrasi,
                 nama: nama,
                 tglLahir: tglLahir,
                 nik: nik,
@@ -1302,8 +1901,8 @@
                 console.log('Sheet save result:', sheetSaveRes);
             }
             
-            // Show confirmation modal
-            showConfirmationModal({ nama, tglLahir, nik, profesi, email, satuSehat, alamat, provinsi, buktiFile, fileUrl, sheetSaved: sheetSaveRes && sheetSaveRes.success });
+            // Show confirmation modal (pass noRegistrasi for PDF)
+            showConfirmationModal({ noRegistrasi, nama, tglLahir, nik, profesi, email, satuSehat, alamat, provinsi, buktiFile, fileUrl, sheetSaved: sheetSaveRes && sheetSaveRes.success });
             
             // show success toast
             showToast('🎉 Data berhasil disimpan! Terima kasih sudah mendaftar.', 'success', 5000);
@@ -1394,8 +1993,8 @@
             if (downloadBtn) {
                 downloadBtn.onclick = async function() { await downloadProofFile(data); };
             }
-            if (closeBtn) closeBtn.onclick = hideConfirmationModal;
-            if (closeBtn2) closeBtn2.onclick = hideConfirmationModal;
+            if (closeBtn) closeBtn.onclick = function() { hideConfirmationModal(); resetForm(); };
+            if (closeBtn2) closeBtn2.onclick = function() { hideConfirmationModal(); resetForm(); };
             
             modal.classList.add('show'); 
             modal.classList.remove('hidden');
@@ -1420,6 +2019,143 @@
                 reader.onload = () => resolve(reader.result);
                 reader.readAsDataURL(file);
             });
+        }
+
+        // Download existing registration proof (for already registered NIK)
+        async function downloadExistingRegistration(nik) {
+            try {
+                showToast('Membuat bukti pendaftaran...', 'info', 0);
+                
+                // Ambil data pendaftaran dari variable global
+                const regData = window.existingRegistrationData || {};
+                
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const now = new Date();
+                const ts = now.toLocaleString('id-ID');
+                
+                // Format tanggal pendaftaran jika ada
+                let tglDaftar = '-';
+                if (regData.timestamp) {
+                    try {
+                        const d = new Date(regData.timestamp);
+                        tglDaftar = d.toLocaleString('id-ID');
+                    } catch(e) {
+                        tglDaftar = String(regData.timestamp);
+                    }
+                }
+                
+                // Header
+                doc.setFillColor(37, 99, 235); // Blue
+                doc.rect(0, 0, 210, 40, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('BUKTI PENDAFTARAN WEBINAR', 105, 18, { align: 'center' });
+                
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Hiperbaric Oxygen Therapy (HBOT) & Ozon Therapy', 105, 26, { align: 'center' });
+                doc.text('Pada Perawatan Luka', 105, 32, { align: 'center' });
+                
+                // Reset text color
+                doc.setTextColor(0, 0, 0);
+                
+                // Registration ID
+                doc.setFillColor(240, 253, 244); // Light green
+                doc.rect(15, 45, 180, 12, 'F');
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('No. Registrasi: ' + (regData.noRegistrasi || 'REG-' + nik.slice(-6)), 20, 52);
+                doc.text('Tanggal Cetak: ' + ts, 130, 52);
+                
+                // Data Peserta section
+                let y = 68;
+                const lineHeight = 10;
+                
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DATA PESERTA', 20, y);
+                doc.setLineWidth(0.5);
+                doc.line(20, y + 2, 190, y + 2);
+                y += 12;
+                
+                // Data rows
+                doc.setFontSize(10);
+                const fields = [
+                    ['Nama Lengkap', regData.nama || '-'],
+                    ['Tanggal Lahir', regData.tglLahir || '-'],
+                    ['NIK', regData.nik || nik || '-'],
+                    ['Profesi', regData.profesi || '-'],
+                    ['Email', regData.email || '-'],
+                    ['Akun Satu Sehat', regData.satuSehat || '-'],
+                    ['Alamat', regData.alamat || '-'],
+                    ['Provinsi', regData.provinsi || '-'],
+                    ['Tanggal Daftar', tglDaftar]
+                ];
+                
+                fields.forEach(function(field) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(field[0] + ':', 20, y);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    // Handle long text
+                    var value = String(field[1]);
+                    if (value.length > 50) {
+                        var lines = doc.splitTextToSize(value, 120);
+                        doc.text(lines, 70, y);
+                        y += (lines.length - 1) * 5;
+                    } else {
+                        doc.text(value, 70, y);
+                    }
+                    y += lineHeight;
+                });
+                
+                // Status section
+                y += 5;
+                doc.setFillColor(220, 252, 231); // Light green
+                doc.rect(15, y - 5, 180, 15, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(22, 101, 52); // Dark green
+                doc.text('STATUS: TERDAFTAR', 20, y + 3);
+                doc.setTextColor(0, 0, 0);
+                
+                // Event Info
+                y += 25;
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('INFORMASI ACARA', 20, y);
+                doc.setLineWidth(0.5);
+                doc.line(20, y + 2, 190, y + 2);
+                
+                y += 10;
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Tanggal: Sabtu, 10 Januari 2026', 20, y);
+                doc.text('Waktu: 08:00 WIB s/d Selesai', 20, y + 7);
+                doc.text('Tempat: Daring via Zoom', 20, y + 14);
+                doc.text('Link Zoom akan diinfokan via Grup WhatsApp', 20, y + 21);
+                
+                // Footer
+                doc.setFillColor(243, 244, 246); // Light gray
+                doc.rect(0, 270, 210, 27, 'F');
+                
+                doc.setFontSize(8);
+                doc.setTextColor(107, 114, 128); // Gray
+                doc.text('Dokumen ini adalah bukti pendaftaran yang sah.', 105, 278, { align: 'center' });
+                doc.text('Harap simpan sebagai arsip.', 105, 284, { align: 'center' });
+                doc.text('© 2026 Panitia Webinar Kesehatan', 105, 290, { align: 'center' });
+                
+                // Save PDF
+                doc.save('bukti_pendaftaran_' + (regData.noRegistrasi || nik) + '.pdf');
+                
+                showToast('PDF bukti pendaftaran berhasil dibuat!', 'success', 3000);
+            } catch (err) {
+                console.error('PDF generation error:', err);
+                showToast('Gagal membuat PDF: ' + err.message, 'error', 3000);
+            }
         }
 
         // Download proof as PDF file
@@ -1455,7 +2191,7 @@
                 doc.rect(15, 45, 180, 12, 'F');
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
-                doc.text('No. Registrasi: REG-' + (data.nik || '').slice(-6) + '-' + Date.now().toString().slice(-4), 20, 52);
+                doc.text('No. Registrasi: ' + (data.noRegistrasi || 'REG-' + (data.nik || '').slice(-6) + '-' + Date.now().toString().slice(-4)), 20, 52);
                 doc.text('Tanggal: ' + ts, 130, 52);
                 
                 // Data section
@@ -1604,6 +2340,35 @@
             }
         }
 
+        // --- COUNTDOWN TIMER ---
+        const eventDate = new Date('2026-01-10T08:00:00'); // 10 Januari 2026, jam 08:00
+        
+        function updateCountdown() {
+            const now = new Date();
+            const diff = eventDate - now;
+            
+            if (diff <= 0) {
+                // Event sudah berlangsung
+                document.getElementById('countdownDays').textContent = '00';
+                document.getElementById('countdownHours').textContent = '00';
+                document.getElementById('countdownMinutes').textContent = '00';
+                document.getElementById('countdownSeconds').textContent = '00';
+                const labelEl = document.querySelector('[data-i18n="countdownLabel"]');
+                if (labelEl) labelEl.textContent = t('countdownEnded');
+                return;
+            }
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('countdownDays').textContent = days.toString().padStart(2, '0');
+            document.getElementById('countdownHours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('countdownMinutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('countdownSeconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
         // 3. Initialize Language on Load and start weather/time updates
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOMContentLoaded: initializing page scripts');
@@ -1622,6 +2387,13 @@
                 setInterval(updateDateTime, 1000);
             } catch (err) {
                 console.error('updateDateTime error', err);
+            }
+            // Start countdown timer
+            try {
+                updateCountdown();
+                setInterval(updateCountdown, 1000); // Update countdown setiap detik
+            } catch (err) {
+                console.error('updateCountdown error', err);
             }
         });
 
