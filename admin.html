@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Webinar Medis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--from) 0%, var(--to) 100%);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        tr:hover {
+            background-color: #f0f9ff;
+        }
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-edit {
+            background: #fbbf24;
+            color: #78350f;
+        }
+        .btn-edit:hover {
+            background: #f59e0b;
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        .btn-view {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-view:hover {
+            background: #2563eb;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-complete {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-incomplete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+        /* Login */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+        /* Loading */
+        .loading-spinner {
+            border: 3px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Search */
+        .search-input {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px 12px 44px;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        /* Pagination */
+        .pagination-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: #3b82f6;
+            color: white;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+            display: none;
+        }
+        #toast.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-user-shield text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+                <p class="text-gray-500 mt-2">Webinar Medis 2026</p>
+            </div>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="username" class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition" placeholder="Masukkan username" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="password" class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition" placeholder="Masukkan password" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl hover:from-blue-700 hover:to-cyan-600 transition shadow-lg">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+            <p id="loginError" class="text-red-500 text-sm text-center mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+        <!-- Header -->
+        <header class="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chart-line text-xl text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">Admin Dashboard</h1>
+                        <p class="text-sm text-gray-500">Webinar Medis 2026</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="refreshData()" class="p-3 bg-blue-100 text-blue-600 rounded-xl hover:bg-blue-200 transition" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition font-semibold">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Pendaftar -->
+                <div class="stat-card rounded-2xl p-6 text-white shadow-xl" style="--from: #3b82f6; --to: #1d4ed8;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">Total Pendaftar</p>
+                            <p id="statTotal" class="text-4xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-users text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Lengkap -->
+                <div class="stat-card rounded-2xl p-6 text-white shadow-xl" style="--from: #10b981; --to: #059669;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">Upload Lengkap</p>
+                            <p id="statComplete" class="text-4xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-circle text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Belum Lengkap -->
+                <div class="stat-card rounded-2xl p-6 text-white shadow-xl" style="--from: #ef4444; --to: #dc2626;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">Tanpa Bukti Transfer</p>
+                            <p id="statIncomplete" class="text-4xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kuota Tersisa -->
+                <div class="stat-card rounded-2xl p-6 text-white shadow-xl" style="--from: #8b5cf6; --to: #7c3aed;">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-purple-100 text-sm font-medium">Kuota Tersisa</p>
+                            <p id="statQuota" class="text-4xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-ticket-alt text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search -->
+            <div class="glass-card rounded-2xl p-6 mb-6 shadow-xl">
+                <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div class="relative w-full md:w-96">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Cari nama, NIK, atau email...">
+                    </div>
+                    <div class="flex gap-3 w-full md:w-auto">
+                        <select id="filterStatus" class="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none bg-white font-medium">
+                            <option value="all">Semua Status</option>
+                            <option value="complete">Upload Lengkap</option>
+                            <option value="incomplete">Tanpa Bukti Transfer</option>
+                        </select>
+                        <button onclick="exportToExcel()" class="px-4 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition font-semibold flex items-center gap-2">
+                            <i class="fas fa-file-excel"></i>
+                            <span class="hidden md:inline">Export Excel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="glass-card rounded-2xl shadow-xl overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-bold text-gray-800">
+                        <i class="fas fa-list-alt mr-2 text-blue-600"></i>Data Pendaftar
+                    </h2>
+                </div>
+                
+                <!-- Loading -->
+                <div id="loadingState" class="p-12 flex flex-col items-center justify-center">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-500">Memuat data...</p>
+                    <p class="text-xs text-gray-400 mt-2">Jika loading terlalu lama, buka Console (F12) untuk melihat error</p>
+                </div>
+                
+                <!-- Error State -->
+                <div id="errorState" class="p-12 text-center hidden">
+                    <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                    <p class="text-gray-700 text-lg font-semibold mb-2">Gagal Memuat Data</p>
+                    <p class="text-gray-500 mb-4">Pastikan Code.gs sudah di-deploy ulang setelah ditambahkan fungsi admin.</p>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left max-w-lg mx-auto mb-4">
+                        <p class="text-sm font-semibold text-yellow-800 mb-2"><i class="fas fa-info-circle mr-1"></i> Langkah Deploy Ulang:</p>
+                        <ol class="text-xs text-yellow-700 list-decimal list-inside space-y-1">
+                            <li>Buka Google Apps Script project</li>
+                            <li>Pastikan Code.gs sudah ada fungsi <code class="bg-yellow-100 px-1 rounded">getAllData</code></li>
+                            <li>Klik <strong>Deploy</strong> → <strong>New deployment</strong></li>
+                            <li>Pilih Type: <strong>Web app</strong></li>
+                            <li>Execute as: <strong>Me</strong>, Who has access: <strong>Anyone</strong></li>
+                            <li>Copy URL baru dan update di admin.html</li>
+                        </ol>
+                    </div>
+                    <button onclick="loadData()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold">
+                        <i class="fas fa-redo mr-2"></i>Coba Lagi
+                    </button>
+                </div>
+                
+                <!-- Table -->
+                <div id="tableContainer" class="table-container hidden">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="w-12">No</th>
+                                <th>No. Registrasi</th>
+                                <th>Nama</th>
+                                <th>NIK</th>
+                                <th>Email</th>
+                                <th>Profesi</th>
+                                <th>Provinsi</th>
+                                <th>Bukti Transfer</th>
+                                <th>Timestamp</th>
+                                <th class="w-32">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="p-12 text-center hidden">
+                    <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">Tidak ada data ditemukan</p>
+                </div>
+                
+                <!-- Pagination -->
+                <div id="pagination" class="p-6 border-t border-gray-200 flex items-center justify-between hidden">
+                    <p id="paginationInfo" class="text-sm text-gray-600"></p>
+                    <div class="flex gap-2" id="paginationButtons">
+                        <!-- Pagination buttons -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-edit mr-2 text-yellow-500"></i>Edit Data Pendaftar
+                </h3>
+                <button onclick="closeEditModal()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <form id="editForm" class="p-6 space-y-4">
+                <input type="hidden" id="editRow">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">No. Registrasi</label>
+                        <input type="text" id="editNoReg" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
+                        <input type="text" id="editNik" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg bg-gray-100" readonly>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="editNama" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+                        <input type="date" id="editTglLahir" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Profesi</label>
+                        <input type="text" id="editProfesi" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="editEmail" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ID Satu Sehat</label>
+                        <input type="text" id="editSatuSehat" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
+                        <input type="text" id="editProvinsi" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea id="editAlamat" rows="2" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold rounded-xl hover:from-blue-700 hover:to-cyan-600 transition">
+                        <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Image Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content max-w-4xl">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-800">
+                    <i class="fas fa-image mr-2 text-blue-500"></i>Bukti Transfer
+                </h3>
+                <button onclick="closeViewModal()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+                    <i class="fas fa-times text-gray-500"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <img id="viewImage" src="" alt="Bukti Transfer" class="w-full rounded-lg shadow-lg">
+                <div id="imageError" class="hidden text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-5xl text-yellow-500 mb-4"></i>
+                    <p class="text-gray-600 mb-2">Gambar tidak dapat ditampilkan di sini</p>
+                    <p class="text-sm text-gray-500">Silakan klik tombol "Buka di Tab Baru" untuk melihat bukti transfer</p>
+                </div>
+                <div class="mt-4 flex justify-end gap-3">
+                    <a id="viewImageLink" href="" target="_blank" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold">
+                        <i class="fas fa-external-link-alt mr-2"></i>Buka di Tab Baru
+                    </a>
+                    <button onclick="closeViewModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-semibold">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6 text-center">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-trash-alt text-4xl text-red-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Hapus Data?</h3>
+                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data pendaftar <strong id="deleteNama"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-3">
+                    <button onclick="confirmDelete()" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition">
+                        <i class="fas fa-trash mr-2"></i>Ya, Hapus
+                    </button>
+                    <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">
+        <div class="bg-white rounded-xl shadow-2xl p-4 flex items-center gap-3 border-l-4" id="toastContent">
+            <i id="toastIcon" class="fas text-xl"></i>
+            <p id="toastMessage" class="font-medium"></p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4hlzQbdK0LWpOZFJ-BV8m9VIE-6buMRbsYC5-aTikgCp0Mq_u9vdkE_ZViLmz_2k6bQ/exec';
+        const MAX_QUOTA = 1000;
+        const ITEMS_PER_PAGE = 10;
+        
+        // State
+        let allData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let deleteRowIndex = null;
+        let deleteNik = null;
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Disable button dan tampilkan loading
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Proses...';
+            btn.disabled = true;
+            
+            // Validasi melalui server
+            const callbackName = 'handleLogin_' + Date.now();
+            window[callbackName] = function(response) {
+                if (response.status === 'success') {
+                    // Simpan token ke sessionStorage
+                    sessionStorage.setItem('adminToken', response.token);
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    showDashboard();
+                } else {
+                    document.getElementById('loginError').textContent = response.message || 'Login gagal!';
+                    document.getElementById('loginError').classList.remove('hidden');
+                    setTimeout(() => {
+                        document.getElementById('loginError').classList.add('hidden');
+                    }, 3000);
+                }
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                delete window[callbackName];
+            };
+            
+            const params = new URLSearchParams({
+                action: 'validateLogin',
+                username: username,
+                password: password,
+                callback: callbackName
+            });
+            
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?${params.toString()}`;
+            script.onerror = function() {
+                document.getElementById('loginError').textContent = 'Gagal terhubung ke server!';
+                document.getElementById('loginError').classList.remove('hidden');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            };
+            document.body.appendChild(script);
+            setTimeout(() => script.remove(), 5000);
+        });
+        
+        // Check login status on load
+        window.onload = function() {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                showDashboard();
+            }
+        };
+        
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadData();
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        // Load data from Google Sheets
+        function loadData() {
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('tableContainer').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('pagination').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            
+            // Create JSONP request
+            const callbackName = 'handleData_' + Date.now();
+            const timeoutId = setTimeout(() => {
+                // Timeout after 15 seconds
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    document.getElementById('loadingState').classList.add('hidden');
+                    document.getElementById('errorState').classList.remove('hidden');
+                    showToast('Timeout! Pastikan Code.gs sudah di-deploy ulang dengan fungsi getAllData.', 'error');
+                    console.error('JSONP timeout. Pastikan:');
+                    console.error('1. Code.gs sudah ditambahkan fungsi getAllData, updateData, deleteData');
+                    console.error('2. Deploy ulang sebagai "New deployment" di Google Apps Script');
+                    console.error('3. Copy URL deployment baru dan update SCRIPT_URL di admin.html');
+                }
+            }, 15000);
+            
+            window[callbackName] = function(response) {
+                clearTimeout(timeoutId);
+                console.log('Response dari server:', response);
+                if (response.status === 'success') {
+                    allData = response.data || [];
+                    console.log('Data loaded:', allData.length, 'records');
+                    updateStats();
+                    filterData();
+                } else {
+                    document.getElementById('errorState').classList.remove('hidden');
+                    showToast('Gagal memuat data: ' + (response.message || 'Unknown error'), 'error');
+                    console.error('Server error:', response);
+                }
+                document.getElementById('loadingState').classList.add('hidden');
+                delete window[callbackName];
+            };
+            
+            const script = document.createElement('script');
+            const url = `${SCRIPT_URL}?action=getAllData&callback=${callbackName}&t=${Date.now()}`;
+            console.log('Loading data from:', url);
+            script.src = url;
+            script.onerror = function(e) {
+                clearTimeout(timeoutId);
+                console.error('Script load error:', e);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+                showToast('Gagal terhubung ke server! Periksa console untuk detail.', 'error');
+                delete window[callbackName];
+            };
+            document.body.appendChild(script);
+            setTimeout(() => script.remove(), 20000);
+        }
+        
+        function refreshData() {
+            loadData();
+            showToast('Data berhasil diperbarui!', 'success');
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const total = allData.length;
+            const complete = allData.filter(d => d.fileUrl && d.fileUrl.trim() !== '').length;
+            const incomplete = total - complete;
+            const quota = MAX_QUOTA - total;
+            
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statComplete').textContent = complete;
+            document.getElementById('statIncomplete').textContent = incomplete;
+            document.getElementById('statQuota').textContent = quota > 0 ? quota : 0;
+        }
+        
+        // Filter and search
+        document.getElementById('searchInput').addEventListener('input', filterData);
+        document.getElementById('filterStatus').addEventListener('change', filterData);
+        
+        function filterData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            
+            filteredData = allData.filter(item => {
+                // Search filter
+                const matchSearch = !searchTerm || 
+                    (item.nama && item.nama.toLowerCase().includes(searchTerm)) ||
+                    (item.nik && item.nik.toLowerCase().includes(searchTerm)) ||
+                    (item.email && item.email.toLowerCase().includes(searchTerm)) ||
+                    (item.noRegistrasi && item.noRegistrasi.toLowerCase().includes(searchTerm));
+                
+                // Status filter
+                const hasFile = item.fileUrl && item.fileUrl.trim() !== '';
+                const matchStatus = statusFilter === 'all' ||
+                    (statusFilter === 'complete' && hasFile) ||
+                    (statusFilter === 'incomplete' && !hasFile);
+                
+                return matchSearch && matchStatus;
+            });
+            
+            currentPage = 1;
+            renderTable();
+        }
+        
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
+            const pagination = document.getElementById('pagination');
+            
+            if (filteredData.length === 0) {
+                tableContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                pagination.classList.add('hidden');
+                return;
+            }
+            
+            tableContainer.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            pagination.classList.remove('hidden');
+            
+            // Pagination calculations
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            // Render rows
+            tbody.innerHTML = pageData.map((item, idx) => {
+                const globalIdx = startIndex + idx;
+                const hasFile = item.fileUrl && item.fileUrl.trim() !== '';
+                const statusClass = hasFile ? 'status-complete' : 'status-incomplete';
+                const statusText = hasFile ? 'Lengkap' : 'Tidak Ada';
+                
+                return `
+                    <tr>
+                        <td class="font-medium text-gray-600">${globalIdx + 1}</td>
+                        <td class="font-mono text-sm text-blue-600">${item.noRegistrasi || '-'}</td>
+                        <td class="font-semibold text-gray-800">${item.nama || '-'}</td>
+                        <td class="font-mono text-sm">${item.nik || '-'}</td>
+                        <td class="text-sm text-gray-600">${item.email || '-'}</td>
+                        <td class="text-sm">${item.profesi || '-'}</td>
+                        <td class="text-sm">${item.provinsi || '-'}</td>
+                        <td>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            ${hasFile ? `
+                                <button onclick="viewImage('${item.fileUrl}')" class="ml-2 text-blue-500 hover:text-blue-700" title="Lihat Preview">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <a href="${item.fileUrl}" target="_blank" class="ml-1 text-green-500 hover:text-green-700" title="Buka di Google Drive">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            ` : ''}
+                        </td>
+                        <td class="text-xs text-gray-500">${item.timestamp || '-'}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button onclick="openEditModal(${item.rowIndex})" class="btn-action btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="openDeleteModal(${item.rowIndex}, '${(item.nama || '').replace(/'/g, "\\'")}', '${(item.nik || '').replace(/'/g, "\\'")}')" class="btn-action btn-delete" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update pagination info
+            document.getElementById('paginationInfo').textContent = 
+                `Menampilkan ${startIndex + 1}-${endIndex} dari ${filteredData.length} data`;
+            
+            // Render pagination buttons
+            renderPagination(totalPages);
+        }
+        
+        function renderPagination(totalPages) {
+            const container = document.getElementById('paginationButtons');
+            let html = '';
+            
+            // Previous button
+            html += `<button onclick="changePage(${currentPage - 1})" class="pagination-btn bg-gray-100" ${currentPage === 1 ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>`;
+            
+            // Page numbers
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+            
+            if (startPage > 1) {
+                html += `<button onclick="changePage(1)" class="pagination-btn bg-gray-100">1</button>`;
+                if (startPage > 2) html += `<span class="px-2 text-gray-400">...</span>`;
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button onclick="changePage(${i})" class="pagination-btn ${i === currentPage ? 'active' : 'bg-gray-100'}">${i}</button>`;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="px-2 text-gray-400">...</span>`;
+                html += `<button onclick="changePage(${totalPages})" class="pagination-btn bg-gray-100">${totalPages}</button>`;
+            }
+            
+            // Next button
+            html += `<button onclick="changePage(${currentPage + 1})" class="pagination-btn bg-gray-100" ${currentPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-right"></i>
+            </button>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderTable();
+        }
+        
+        // View Image Modal
+        function viewImage(url) {
+            const viewableUrl = convertToViewableUrl(url);
+            const thumbnailUrl = convertToThumbnailUrl(url);
+            
+            // Set image source (use thumbnail for display)
+            const img = document.getElementById('viewImage');
+            img.src = thumbnailUrl || viewableUrl;
+            img.onerror = function() {
+                // If thumbnail fails, show a message
+                this.style.display = 'none';
+                document.getElementById('imageError').classList.remove('hidden');
+            };
+            img.onload = function() {
+                this.style.display = 'block';
+                document.getElementById('imageError').classList.add('hidden');
+            };
+            
+            document.getElementById('viewImageLink').href = viewableUrl;
+            document.getElementById('viewModal').classList.add('show');
+        }
+        
+        // Convert Google Drive URL to viewable format
+        function convertToViewableUrl(url) {
+            if (!url) return '';
+            
+            // Extract file ID from various Google Drive URL formats
+            const patterns = [
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /id=([a-zA-Z0-9_-]+)/,
+                /\/file\/d\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            let fileId = null;
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) {
+                    fileId = match[1];
+                    break;
+                }
+            }
+            
+            // If we found a file ID, return the direct view URL
+            if (fileId) {
+                return `https://drive.google.com/file/d/${fileId}/view`;
+            }
+            
+            // Return original URL if not a Google Drive URL
+            return url;
+        }
+        
+        // Convert Google Drive URL to thumbnail/preview format
+        function convertToThumbnailUrl(url) {
+            if (!url) return '';
+            
+            // Extract file ID
+            const patterns = [
+                /\/d\/([a-zA-Z0-9_-]+)/,
+                /id=([a-zA-Z0-9_-]+)/,
+                /\/file\/d\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            let fileId = null;
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) {
+                    fileId = match[1];
+                    break;
+                }
+            }
+            
+            // Return Google Drive thumbnail URL
+            if (fileId) {
+                return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+            }
+            
+            return url;
+        }
+        
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('show');
+        }
+        
+        // Edit Modal
+        function openEditModal(rowIndex) {
+            const item = allData.find(d => d.rowIndex === rowIndex);
+            if (!item) return;
+            
+            document.getElementById('editRow').value = rowIndex;
+            document.getElementById('editNoReg').value = item.noRegistrasi || '';
+            document.getElementById('editNik').value = item.nik || '';
+            document.getElementById('editNama').value = item.nama || '';
+            document.getElementById('editTglLahir').value = item.tglLahir || '';
+            document.getElementById('editProfesi').value = item.profesi || '';
+            document.getElementById('editEmail').value = item.email || '';
+            document.getElementById('editSatuSehat').value = item.satuSehat || '';
+            document.getElementById('editProvinsi').value = item.provinsi || '';
+            document.getElementById('editAlamat').value = item.alamat || '';
+            
+            document.getElementById('editModal').classList.add('show');
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+        
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const rowIndex = document.getElementById('editRow').value;
+            const data = {
+                rowIndex: parseInt(rowIndex),
+                nama: document.getElementById('editNama').value,
+                tglLahir: document.getElementById('editTglLahir').value,
+                profesi: document.getElementById('editProfesi').value,
+                email: document.getElementById('editEmail').value,
+                satuSehat: document.getElementById('editSatuSehat').value,
+                provinsi: document.getElementById('editProvinsi').value,
+                alamat: document.getElementById('editAlamat').value
+            };
+            
+            // Send update request
+            const callbackName = 'handleUpdate_' + Date.now();
+            window[callbackName] = function(response) {
+                if (response.status === 'success') {
+                    showToast('Data berhasil diperbarui!', 'success');
+                    closeEditModal();
+                    loadData();
+                } else {
+                    showToast('Gagal memperbarui data!', 'error');
+                }
+                delete window[callbackName];
+            };
+            
+            const params = new URLSearchParams({
+                action: 'updateData',
+                callback: callbackName,
+                ...data
+            });
+            
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?${params.toString()}`;
+            document.body.appendChild(script);
+            setTimeout(() => script.remove(), 5000);
+        });
+        
+        // Delete Modal
+        function openDeleteModal(rowIndex, nama, nik) {
+            deleteRowIndex = rowIndex;
+            deleteNik = nik;
+            document.getElementById('deleteNama').textContent = nama;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            deleteRowIndex = null;
+            deleteNik = null;
+        }
+        
+        function confirmDelete() {
+            if (!deleteRowIndex) return;
+            
+            console.log('Deleting row:', deleteRowIndex, 'NIK:', deleteNik);
+            
+            const callbackName = 'handleDelete_' + Date.now();
+            window[callbackName] = function(response) {
+                console.log('Delete response:', response);
+                if (response.status === 'success') {
+                    showToast('Data berhasil dihapus!', 'success');
+                    closeDeleteModal();
+                    loadData();
+                } else {
+                    showToast('Gagal menghapus data: ' + (response.message || ''), 'error');
+                }
+                delete window[callbackName];
+            };
+            
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?action=deleteData&rowIndex=${deleteRowIndex}&deleteNik=${encodeURIComponent(deleteNik || '')}&callback=${callbackName}`;
+            console.log('Delete URL:', script.src);
+            document.body.appendChild(script);
+            setTimeout(() => script.remove(), 5000);
+        }
+        
+        // Export to Excel (XLSX)
+        function exportToExcel() {
+            if (filteredData.length === 0) {
+                showToast('Tidak ada data untuk di-export!', 'error');
+                return;
+            }
+            
+            const headers = ['No', 'No. Registrasi', 'Nama', 'Tanggal Lahir', 'NIK', 'Profesi', 'Email', 'ID Satu Sehat', 'Alamat', 'Provinsi', 'Status Bukti Transfer', 'Link Bukti', 'Timestamp'];
+            
+            const rows = filteredData.map((item, idx) => {
+                const hasFile = item.fileUrl && item.fileUrl.trim() !== '';
+                return [
+                    idx + 1,
+                    item.noRegistrasi || '',
+                    item.nama || '',
+                    item.tglLahir || '',
+                    item.nik || '',
+                    item.profesi || '',
+                    item.email || '',
+                    item.satuSehat || '',
+                    item.alamat || '',
+                    item.provinsi || '',
+                    hasFile ? 'Lengkap' : 'Tidak Ada',
+                    item.fileUrl || '',
+                    item.timestamp || ''
+                ];
+            });
+            
+            // Create worksheet data
+            const wsData = [headers, ...rows];
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 5 },   // No
+                { wch: 15 },  // No. Registrasi
+                { wch: 30 },  // Nama
+                { wch: 12 },  // Tanggal Lahir
+                { wch: 18 },  // NIK
+                { wch: 20 },  // Profesi
+                { wch: 30 },  // Email
+                { wch: 15 },  // ID Satu Sehat
+                { wch: 40 },  // Alamat
+                { wch: 20 },  // Provinsi
+                { wch: 15 },  // Status Bukti Transfer
+                { wch: 50 },  // Link Bukti
+                { wch: 20 }   // Timestamp
+            ];
+            
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Data Pendaftar');
+            
+            // Generate filename with date
+            const filename = `pendaftar_webinar_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            // Save file
+            XLSX.writeFile(wb, filename);
+            
+            showToast('Data berhasil di-export ke Excel!', 'success');
+        }
+        
+        // Export to CSV (legacy function)
+        function exportToCSV() {
+            if (filteredData.length === 0) {
+                showToast('Tidak ada data untuk di-export!', 'error');
+                return;
+            }
+            
+            const headers = ['No', 'No. Registrasi', 'Nama', 'Tanggal Lahir', 'NIK', 'Profesi', 'Email', 'ID Satu Sehat', 'Alamat', 'Provinsi', 'Status Bukti Transfer', 'Link Bukti', 'Timestamp'];
+            
+            const rows = filteredData.map((item, idx) => {
+                const hasFile = item.fileUrl && item.fileUrl.trim() !== '';
+                return [
+                    idx + 1,
+                    item.noRegistrasi || '',
+                    item.nama || '',
+                    item.tglLahir || '',
+                    item.nik || '',
+                    item.profesi || '',
+                    item.email || '',
+                    item.satuSehat || '',
+                    (item.alamat || '').replace(/,/g, ';'),
+                    item.provinsi || '',
+                    hasFile ? 'Lengkap' : 'Tidak Ada',
+                    item.fileUrl || '',
+                    item.timestamp || ''
+                ];
+            });
+            
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `pendaftar_webinar_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showToast('Data berhasil di-export!', 'success');
+        }
+        
+        // Toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const content = document.getElementById('toastContent');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+            
+            const types = {
+                success: { border: 'border-green-500', icon: 'fa-check-circle text-green-500' },
+                error: { border: 'border-red-500', icon: 'fa-exclamation-circle text-red-500' },
+                info: { border: 'border-blue-500', icon: 'fa-info-circle text-blue-500' }
+            };
+            
+            const config = types[type] || types.info;
+            content.className = `bg-white rounded-xl shadow-2xl p-4 flex items-center gap-3 border-l-4 ${config.border}`;
+            icon.className = `fas ${config.icon} text-xl`;
+            msg.textContent = message;
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        // Close modals on backdrop click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
